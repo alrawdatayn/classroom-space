@@ -458,6 +458,15 @@
     import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
     import { getFirestore, doc, setDoc, onSnapshot, collection, writeBatch } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
+    const DEFAULT_FIREBASE_CONFIG = {
+      apiKey: "AIzaSyDhk8u4jA4ynC6tx_XQREjIfM7zWV1c3aU",
+      authDomain: "masahat-saffi.firebaseapp.com",
+      projectId: "masahat-saffi",
+      storageBucket: "masahat-saffi.firebasestorage.app",
+      messagingSenderId: "918705926401",
+      appId: "1:918705926401:web:723726d2b3697fe0016b00"
+    };
+
     window.FirebaseBridge = {
       available: false,
       app: null,
@@ -469,7 +478,7 @@
 
       init(customConfig) {
         try {
-          let cfg = customConfig;
+          let cfg = customConfig || DEFAULT_FIREBASE_CONFIG;
           if (!cfg && typeof __firebase_config !== 'undefined' && __firebase_config) {
             cfg = JSON.parse(__firebase_config);
           }
@@ -477,9 +486,11 @@
             this.available = false;
             return false;
           }
-          this.app = initializeApp(cfg);
-          this.auth = getAuth(this.app);
-          this.db = getFirestore(this.app);
+          if (!this.app) {
+            this.app = initializeApp(cfg);
+            this.auth = getAuth(this.app);
+            this.db = getFirestore(this.app);
+          }
           this.available = true;
 
           onAuthStateChanged(this.auth, async (user) => {
