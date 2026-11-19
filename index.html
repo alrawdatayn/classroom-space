@@ -134,7 +134,7 @@
 
   <!-- Custom Confirm / Modal Dialog -->
   <div id="modal-backdrop" class="fixed inset-0 bg-slate-950/60 backdrop-blur-sm z-[90] hidden items-center justify-center p-4">
-    <div id="modal-box" class="bg-white rounded-3xl shadow-2xl max-w-lg w-full p-6 border border-slate-100 transform transition-all">
+    <div id="modal-box" class="bg-white rounded-3xl shadow-2xl max-w-lg w-full p-6 border border-slate-100 transform transition-all max-h-[90vh] overflow-y-auto">
       <div class="flex items-start justify-between gap-3 mb-3">
         <h3 id="modal-title" class="text-xl font-extrabold text-slate-900">تأكيد</h3>
         <button onclick="UI.closeModal()" class="p-2 rounded-xl text-slate-400 hover:bg-slate-100 hover:text-slate-700">
@@ -146,7 +146,7 @@
     </div>
   </div>
 
-  <!-- Teacher Cloud Authentication Gate (Email/Password + Google + Local Demo Option) -->
+  <!-- Teacher Cloud Authentication Gate (Email/Password + Google + Password Setup + Local Demo Option) -->
   <div id="auth-gate-overlay" class="fixed inset-0 bg-gradient-to-br from-brand-950 via-brand-900 to-slate-950 z-[88] hidden items-center justify-center p-4 overflow-y-auto">
     <div class="bg-white rounded-3xl shadow-2xl max-w-md w-full p-6 md:p-8 border border-brand-100 my-auto space-y-5">
       <div class="text-center space-y-2">
@@ -174,7 +174,12 @@
           <input id="gate-email" type="email" placeholder="teacher@school.edu.sa" dir="ltr" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-brand-600 outline-none text-sm font-bold text-left" />
         </div>
         <div>
-          <label class="block text-xs font-bold text-slate-700 mb-1">كلمة المرور</label>
+          <div class="flex items-center justify-between mb-1">
+            <label class="block text-xs font-bold text-slate-700">كلمة المرور</label>
+            <button type="button" onclick="App.sendGatePasswordReset()" class="text-[11px] font-bold text-brand-700 hover:underline">
+              نسيت / تعيين كلمة مرور لبريدي؟
+            </button>
+          </div>
           <input id="gate-pass" type="password" placeholder="••••••••" dir="ltr" onkeydown="if(event.key==='Enter') App.submitGateAuth()" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-brand-600 outline-none text-sm font-bold text-left" />
         </div>
         <button id="gate-submit-btn" onclick="App.submitGateAuth()" class="w-full py-3.5 rounded-2xl bg-brand-700 hover:bg-brand-800 text-white font-black text-sm shadow-lg shadow-brand-200 transition">
@@ -452,11 +457,33 @@
     </main>
   </div>
 
-  <!-- Firebase Modular SDK (Optional Cloud Sync when configured) -->
+  <!-- Firebase Modular SDK (Safari-Compatible Long Polling + Server Sync + Password Linking) -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-    import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-    import { getFirestore, doc, setDoc, onSnapshot, collection, writeBatch } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+    import {
+      getAuth,
+      signInWithEmailAndPassword,
+      createUserWithEmailAndPassword,
+      signInWithPopup,
+      GoogleAuthProvider,
+      signOut,
+      onAuthStateChanged,
+      signInWithCustomToken,
+      sendPasswordResetEmail,
+      EmailAuthProvider,
+      linkWithCredential,
+      updatePassword
+    } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+    import {
+      initializeFirestore,
+      doc,
+      setDoc,
+      getDocFromServer,
+      getDocsFromServer,
+      onSnapshot,
+      collection,
+      writeBatch
+    } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
     const DEFAULT_FIREBASE_CONFIG = {
       apiKey: "AIzaSyDhk8u4jA4ynC6tx_XQREjIfM7zWV1c3aU",
@@ -489,7 +516,10 @@
           if (!this.app) {
             this.app = initializeApp(cfg);
             this.auth = getAuth(this.app);
-            this.db = getFirestore(this.app);
+            // Force Safari / iPad / iPhone compatible real-time sync transport
+            this.db = initializeFirestore(this.app, {
+              experimentalAutoDetectLongPolling: true
+            });
           }
           this.available = true;
 
@@ -497,7 +527,7 @@
             this.user = user;
             if (user) {
               window.App?.onCloudUserChanged(user);
-              this.listenToTeacherData(user.uid);
+              await this.listenToTeacherData(user.uid);
             } else {
               if (this.unsubState) this.unsubState();
               if (this.unsubLedger) this.unsubLedger();
@@ -521,33 +551,79 @@
         return { appId, uid };
       },
 
-      listenToTeacherData(uid) {
+      async forcePullFromServer() {
+        if (!this.db || !this.user) return false;
+        const { appId } = this.getTeacherBase(this.user.uid);
+        const stateRef = doc(this.db, 'artifacts', appId, 'users', this.user.uid, 'classroomData', 'mainState');
+        const ledgerCol = collection(this.db, 'artifacts', appId, 'users', this.user.uid, 'pointsLedger');
+
+        const [stateSnap, ledgerSnap] = await Promise.all([
+          getDocFromServer(stateRef),
+          getDocsFromServer(ledgerCol)
+        ]);
+
+        if (stateSnap.exists() && stateSnap.data()?.onboarded) {
+          window.App?.applyRemoteState(stateSnap.data());
+        } else if (window.App?.state?.onboarded) {
+          // Auto-migrate existing local data on this device up to the cloud!
+          await this.saveState(window.App.state);
+          if (window.App.state.heartLedger?.length) {
+            await this.saveLedgerEntries(window.App.state.heartLedger);
+          }
+          UI.toast('تم رفع بياناتك المحلية إلى السحابة لمزامنتها مع أجهزتك!', 'success');
+        }
+
+        const entries = [];
+        ledgerSnap.forEach((docSnap) => {
+          entries.push({ id: docSnap.id, ...docSnap.data() });
+        });
+        if (entries.length > 0) {
+          entries.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+          window.App?.applyRemoteLedger(entries, false);
+        }
+        return stateSnap.exists();
+      },
+
+      async listenToTeacherData(uid) {
         if (!this.db || !uid) return;
         if (this.unsubState) this.unsubState();
         if (this.unsubLedger) this.unsubLedger();
 
         const { appId } = this.getTeacherBase(uid);
-        // Isolated per-teacher document path under /artifacts/{appId}/users/{uid}/...
         const stateRef = doc(this.db, 'artifacts', appId, 'users', uid, 'classroomData', 'mainState');
         const ledgerCol = collection(this.db, 'artifacts', appId, 'users', uid, 'pointsLedger');
 
         let initialSnapHandled = false;
 
+        try {
+          window.App?.setSyncStatus('syncing', 'جارٍ جلب بياناتك من السحابة...');
+          const existsOnServer = await this.forcePullFromServer();
+          if (existsOnServer || window.App?.state?.onboarded) {
+            initialSnapHandled = true;
+            window.App?.setSyncStatus('cloud', 'متصل ومتزامن سحابيًا');
+          }
+        } catch (e) {
+          console.warn("Initial server fetch fallback to listener:", e);
+        }
+
         this.unsubState = onSnapshot(stateRef, (snap) => {
           if (snap.metadata.hasPendingWrites) return;
-          if (snap.exists()) {
+          if (snap.exists() && snap.data()?.onboarded) {
             initialSnapHandled = true;
             window.App?.applyRemoteState(snap.data());
           } else if (!initialSnapHandled) {
             initialSnapHandled = true;
-            window.App?.handleNewCloudTeacher(uid);
+            if (window.App?.state?.onboarded) {
+              this.saveState(window.App.state);
+            } else {
+              window.App?.handleNewCloudTeacher(uid);
+            }
           }
         }, (err) => {
           console.error("Firestore mainState sync error:", err);
           window.App?.setSyncStatus('error', 'تعذر الاتصال بالسحابة');
         });
 
-        // Real-time listener on independent pointsLedger documents (sorted in JS memory)
         this.unsubLedger = onSnapshot(ledgerCol, (querySnap) => {
           const entries = [];
           querySnap.forEach((docSnap) => {
@@ -564,7 +640,6 @@
         if (!this.available || !this.user || !this.db) return false;
         const { appId } = this.getTeacherBase(this.user.uid);
         const ref = doc(this.db, 'artifacts', appId, 'users', this.user.uid, 'classroomData', 'mainState');
-        // Exclude heartLedger from mainState and strip undefined values for Firestore compatibility
         const { heartLedger, ...restState } = stateObj;
         const cleanState = JSON.parse(JSON.stringify(restState));
         await setDoc(ref, cleanState, { merge: true });
@@ -594,6 +669,23 @@
         if (!this.auth) throw new Error("يرجى إدخال إعدادات Firebase Config أولاً لتفعيل السحابة.");
         const provider = new GoogleAuthProvider();
         return await signInWithPopup(this.auth, provider);
+      },
+
+      async sendPasswordReset(email) {
+        if (!this.auth) throw new Error("اتصال السحابة غير مفعّل.");
+        await sendPasswordResetEmail(this.auth, email);
+      },
+
+      async attachOrUpdatePassword(newPassword) {
+        if (!this.auth || !this.auth.currentUser) throw new Error("لا يوجد حساب مسجل الدخول حاليًا.");
+        const user = this.auth.currentUser;
+        const hasPasswordProvider = user.providerData.some(p => p.providerId === 'password');
+        if (hasPasswordProvider) {
+          await updatePassword(user, newPassword);
+        } else if (user.email) {
+          const cred = EmailAuthProvider.credential(user.email, newPassword);
+          await linkWithCredential(user, cred);
+        }
       },
 
       async logout() {
@@ -757,7 +849,7 @@
           el.style.opacity = '0';
           el.style.transform = 'translateY(10px)';
           setTimeout(() => el.remove(), 300);
-        }, 4200);
+        }, 4500);
       },
 
       openModal({ title, bodyHtml, actions = [] }) {
@@ -1011,18 +1103,33 @@
         const code = err?.code || '';
         if (code === 'auth/invalid-email') return 'صيغة البريد الإلكتروني غير صحيحة.';
         if (code === 'auth/user-not-found' || code === 'auth/wrong-password' || code === 'auth/invalid-credential') {
-          return 'البريد الإلكتروني أو كلمة المرور غير صحيحة.';
+          return 'كلمة المرور غير صحيحة، أو أن حسابك مسجل عبر Google فقط — اضغط «نسيت / تعيين كلمة مرور لبريدي» أو ادخل بحساب Google.';
         }
-        if (code === 'auth/email-already-in-use') return 'هذا البريد الإلكتروني مسجّل مسبقًا — اختر تسجيل الدخول.';
+        if (code === 'auth/email-already-in-use') {
+          return 'هذا البريد مسجّل مسبقًا (ربما عبر Google) — اضغط «نسيت / تعيين كلمة مرور لبريدي» لتعيين كلمة مرور له.';
+        }
         if (code === 'auth/weak-password') return 'كلمة المرور يجب أن تتكون من 6 أحرف على الأقل.';
         if (code === 'auth/operation-not-allowed') {
-          return 'طريقة الدخول هذه غير مفعّلة في إعدادات مشروع Firebase (فعّلها من Authentication > Sign-in method، أو استخدم الوضع التجريبي المحلي بالأسفل).';
+          return 'طريقة الدخول هذه غير مفعّلة في إعدادات مشروع Firebase.';
         }
         if (code === 'auth/unauthorized-domain') {
-          return 'هذا النطاق غير مضاف في Firebase (أضفه في Authentication > Settings > Authorized domains، أو استخدم الوضع التجريبي المحلي بالأسفل).';
+          return `النطاق (${window.location.hostname}) غير مضاف في Firebase (أضفه في Authentication > Settings > Authorized domains).`;
         }
         if (code === 'auth/popup-closed-by-user') return 'تم إغلاق نافذة تسجيل الدخول قبل الإكمال.';
         return err?.message || 'تعذر إتمام العملية — تحقق من الاتصال أو إعدادات السحابة.';
+      },
+
+      async sendGatePasswordReset() {
+        const email = document.getElementById('gate-email').value.trim();
+        if (!email) {
+          return UI.toast('اكتب بريدك الإلكتروني في الخانة أعلاه أولاً ثم اضغط تعيين/نسيت كلمة المرور', 'warning');
+        }
+        try {
+          await window.FirebaseBridge.sendPasswordReset(email);
+          UI.toast(`تم إرسال رابط تعيين كلمة المرور إلى ${email} — تفقد بريدك الوارد أو المهمل (Spam)`, 'success');
+        } catch (e) {
+          UI.toast(this.formatAuthError(e), 'error');
+        }
       },
 
       async submitGateAuth() {
@@ -1119,6 +1226,27 @@
         } catch (e) {
           this.setSyncStatus('error', 'تعذر الحفظ السحابي');
           if (!silent) UI.toast('حدث خطأ أثناء المزامنة السحابية', 'error');
+        }
+      },
+
+      async forceCloudSyncNow() {
+        if (!window.FirebaseBridge || !window.FirebaseBridge.user) {
+          return UI.toast('يرجى تسجيل الدخول بحسابك السحابي أولاً', 'warning');
+        }
+        try {
+          this.setSyncStatus('syncing', 'جارٍ المزامنة الفورية...');
+          if (this.state.onboarded) {
+            await window.FirebaseBridge.saveState(this.state);
+            if (this.state.heartLedger?.length) {
+              await window.FirebaseBridge.saveLedgerEntries(this.state.heartLedger);
+            }
+          }
+          await window.FirebaseBridge.forcePullFromServer();
+          this.setSyncStatus('cloud', 'متصل ومتزامن سحابيًا');
+          UI.toast('✅ اكتملت المزامنة السحابية الفورية بنجاح!', 'success');
+        } catch (e) {
+          this.setSyncStatus('error', 'تعذر المزامنة');
+          UI.toast('تعذر إتمام المزامنة: ' + (e?.message || ''), 'error');
         }
       },
 
@@ -1757,27 +1885,21 @@
                 </div>
                 <p class="text-xs leading-relaxed">
                   ${user
-                    ? `البريد الإلكتروني: <b>${UI.escapeHtml(user.email || 'حساب موثّق')}</b> — يتم حفظ الفصول والطلاب والقلوب والأسئلة تلقائيًا ومزامنتها لحظيًا.`
-                    : 'البيانات محفوظة حاليًا في هذا المتصفح فقط. لتفعيل الحساب المستقل والمزامنة الفورية بين الكمبيوتر والآيباد والجوال، أدخل إعدادات مشروع Firebase أدناه.'}
+                    ? `البريد الإلكتروني: <b dir="ltr">${UI.escapeHtml(user.email || 'حساب موثّق')}</b> — يتم حفظ الفصول والطلاب والقلوب والأسئلة تلقائيًا ومزامنتها لحظيًا.`
+                    : 'البيانات محفوظة حاليًا في هذا المتصفح فقط. سجّل الدخول بحسابك لمزامنة بياناتك بين اللابتوب والآيباد والجوال.'}
                 </p>
               </div>
 
               ${!fbAvailable ? `
                 <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-2">
-                  <div class="font-bold text-sm text-slate-800">خطوات تفعيل المزامنة السحابية (مجاني عبر Google Firebase):</div>
-                  <ol class="list-decimal list-inside text-xs text-slate-600 space-y-1">
-                    <li>أنشئ مشروعًا مجانيًا في <b>console.firebase.google.com</b>.</li>
-                    <li>فعّل <b>Authentication</b> (البريد الإلكتروني/كلمة المرور + Google).</li>
-                    <li>أنشئ قاعدة بيانات <b>Cloud Firestore</b>.</li>
-                    <li>انسخ كائن إعدادات الويب <code>firebaseConfig</code> بصيغة JSON هنا:</li>
-                  </ol>
+                  <div class="font-bold text-sm text-slate-800">إعدادات Firebase Config:</div>
                   <textarea id="fb-cfg-input" rows="4" placeholder='{"apiKey":"...","authDomain":"...","projectId":"..."}' class="w-full p-2.5 rounded-xl border border-slate-300 font-mono text-xs text-left" dir="ltr"></textarea>
                   <button onclick="App.saveFirebaseConfig()" class="w-full py-2.5 rounded-xl bg-brand-700 text-white font-bold text-sm hover:bg-brand-800">حفظ وتفعيل اتصال السحابة</button>
                 </div>
               ` : (!user ? `
                 <div class="space-y-3">
-                  <input id="auth-email" type="email" placeholder="البريد الإلكتروني للمعلم" class="w-full px-4 py-2.5 rounded-xl border border-slate-200" />
-                  <input id="auth-pass" type="password" placeholder="كلمة المرور (6 أحرف فأكثر)" class="w-full px-4 py-2.5 rounded-xl border border-slate-200" />
+                  <input id="auth-email" type="email" placeholder="البريد الإلكتروني للمعلم" dir="ltr" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-left" />
+                  <input id="auth-pass" type="password" placeholder="كلمة المرور (6 أحرف فأكثر)" dir="ltr" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-left" />
                   <div class="grid grid-cols-2 gap-2">
                     <button onclick="App.handleAuth(false)" class="py-2.5 rounded-xl bg-brand-700 text-white font-bold text-sm">تسجيل الدخول</button>
                     <button onclick="App.handleAuth(true)" class="py-2.5 rounded-xl bg-slate-800 text-white font-bold text-sm">إنشاء حساب جديد</button>
@@ -1787,12 +1909,46 @@
                   </button>
                 </div>
               ` : `
-                <button onclick="App.logout()" class="w-full py-2.5 rounded-xl bg-rose-600 text-white font-bold text-sm">تسجيل الخروج</button>
+                <div class="space-y-3">
+                  <button onclick="App.forceCloudSyncNow()" class="w-full py-3 rounded-xl bg-brand-700 hover:bg-brand-800 text-white font-extrabold text-sm flex items-center justify-center gap-2 shadow">
+                    <i data-lucide="refresh-cw" class="w-4 h-4"></i>
+                    <span>مزامنة فورية الآن (رفع وتحديث البيانات بين الأجهزة)</span>
+                  </button>
+
+                  <div class="p-3.5 rounded-2xl bg-slate-50 border border-slate-200 space-y-2">
+                    <div class="text-xs font-extrabold text-slate-800">🔑 تعيين / تحديث كلمة مرور للدخول بالبريد الإلكتروني:</div>
+                    <p class="text-[11px] text-slate-500">إذا كنت تدخل بحساب Google وتريد الدخول بالبريد وكلمة المرور أيضًا من أي جهاز، عيّن كلمة مرور هنا:</p>
+                    <div class="flex gap-2">
+                      <input id="link-new-pass" type="password" placeholder="كلمة مرور جديدة (6 أحرف+)" dir="ltr" class="flex-1 px-3 py-2 rounded-xl border border-slate-300 text-xs text-left" />
+                      <button onclick="App.setAccountPassword()" class="px-4 py-2 rounded-xl bg-slate-900 text-white font-bold text-xs shrink-0">حفظ</button>
+                    </div>
+                  </div>
+
+                  <button onclick="App.logout()" class="w-full py-2.5 rounded-xl bg-rose-600 text-white font-bold text-sm">تسجيل الخروج</button>
+                </div>
               `)}
             </div>
           `,
           actions: [{ label: 'إغلاق', className: 'px-4 py-2 rounded-xl bg-slate-100 font-bold text-slate-700' }]
         });
+      },
+
+      async setAccountPassword() {
+        const newPass = document.getElementById('link-new-pass')?.value || '';
+        if (newPass.length < 6) {
+          return UI.toast('كلمة المرور يجب أن تتكون من 6 أحرف على الأقل', 'warning');
+        }
+        try {
+          await window.FirebaseBridge.attachOrUpdatePassword(newPass);
+          UI.toast('✅ تم ربط كلمة المرور بحسابك بنجاح! يمكنك الآن الدخول بالبريد وكلمة المرور من أي جهاز.', 'success');
+          document.getElementById('link-new-pass').value = '';
+        } catch (e) {
+          if (e?.code === 'auth/requires-recent-login') {
+            UI.toast('لأسباب أمنية، سجّل الخروج ثم ادخل بحساب Google وأعد تعيين كلمة المرور فورًا.', 'warning');
+          } else {
+            UI.toast(this.formatAuthError(e), 'error');
+          }
+        }
       },
 
       saveFirebaseConfig() {
@@ -2634,8 +2790,6 @@
 
     /* ==========================================================================
        6. SECTION 2: «الحصة» (SPLIT-SCREEN LESSON WORKSPACE)
-       Main Area (Right in RTL): Book/Presentation Viewer OR 2D Games always visible
-       Side Panel (Left in RTL): Points & QR, Wheel, Timer, Groups
        ========================================================================== */
     const LessonView = {
       render(container) {
@@ -2866,7 +3020,6 @@
           annCanvas.height = richStage.offsetHeight || 420;
         }
 
-        // Save last page per class
         if (!book.lastPageByClass) book.lastPageByClass = {};
         book.lastPageByClass[App.activeClassId] = App.viewerState.pageNum;
 
@@ -3035,7 +3188,6 @@
 
         el.innerHTML = `
           <div class="flex flex-col gap-4 p-4">
-            <!-- Wheel Canvas Column -->
             <div class="bg-white p-4 rounded-3xl border border-slate-200 shadow-sm flex flex-col items-center">
               <div class="relative w-full max-w-[260px] aspect-square flex items-center justify-center my-2">
                 <div class="absolute -left-2 top-1/2 -translate-y-1/2 z-10 w-0 h-0 border-t-[12px] border-t-transparent border-b-[12px] border-b-transparent border-r-[20px] border-r-amber-500 drop-shadow"></div>
@@ -3063,7 +3215,6 @@
               `}
             </div>
 
-            <!-- Remaining vs Picked Lists -->
             <div class="space-y-4">
               <div class="bg-white p-4 rounded-3xl border border-slate-200 shadow-sm">
                 <div class="flex items-center justify-between mb-2">
@@ -3307,7 +3458,6 @@
               ${this.format(App.timer.remainingSec)}
             </div>
 
-            <!-- Presets -->
             <div class="flex flex-wrap justify-center gap-1.5">
               ${[1, 2, 3, 5, 10, 15].map(m => `
                 <button onclick="TimerModule.setDuration(${m})" class="px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-brand-100 hover:text-brand-800 font-extrabold text-xs transition">
@@ -3316,13 +3466,11 @@
               `).join('')}
             </div>
 
-            <!-- Custom Minutes -->
             <div class="flex items-center justify-center gap-2">
               <input id="custom-timer-min" type="number" min="1" max="120" placeholder="دقائق" class="w-20 px-3 py-1.5 rounded-lg border border-slate-200 text-xs font-bold text-center" />
               <button onclick="const v=parseFloat(document.getElementById('custom-timer-min').value); if(v>0) TimerModule.setDuration(v);" class="px-3 py-1.5 rounded-lg bg-slate-800 text-white font-bold text-xs">ضبط</button>
             </div>
 
-            <!-- Controls -->
             <div class="flex flex-col gap-2 pt-2">
               ${!App.timer.running ? `
                 <button onclick="TimerModule.start()" class="w-full py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-black text-sm shadow flex items-center justify-center gap-2">
@@ -3360,7 +3508,6 @@
 
         el.innerHTML = `
           <div class="flex flex-col gap-4 p-4">
-            <!-- Controls -->
             <div class="bg-white p-4 rounded-3xl border border-slate-200 shadow-sm flex flex-col gap-3">
               <div class="flex items-center gap-2">
                 <label class="text-xs font-extrabold text-slate-700">عدد المجموعات:</label>
@@ -3393,7 +3540,6 @@
               </div>
             ` : ''}
 
-            <!-- Groups Grid -->
             <div class="grid grid-cols-1 gap-4">
               ${groups.map(g => {
                 const members = g.studentIds.map(id => students.find(s => s.id === id)).filter(Boolean);
@@ -3422,7 +3568,6 @@
                         `).join('')}
                     </div>
 
-                    <!-- Award Hearts -->
                     <div class="pt-2 border-t border-slate-100 flex items-center justify-between gap-1">
                       <span class="text-[9px] font-bold text-slate-500">منح الكل:</span>
                       <div class="flex gap-1">
@@ -3542,7 +3687,6 @@
 
         el.innerHTML = `
           <div class="space-y-6">
-            <!-- Game Mode Cards -->
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
               ${[
                 { id: 'box', title: 'افتح الصندوق', desc: 'صناديق غامضة مرقمة يختارها الطلاب لكشف السؤال وكسب القلوب', icon: 'package-open', color: 'from-brand-700 to-brand-900' },
@@ -3560,7 +3704,6 @@
               `).join('')}
             </div>
 
-            <!-- Setup Panel -->
             <div class="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm space-y-5">
               <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
@@ -3583,7 +3726,6 @@
                 </div>
               </div>
 
-              <!-- Quick Add Question Before Game -->
               <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-3">
                 <div class="font-extrabold text-sm text-slate-800">+ إضافة سؤال سريع قبل بدء اللعبة:</div>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
@@ -3596,7 +3738,6 @@
                 </div>
               </div>
 
-              <!-- Select Questions from Bank -->
               <div>
                 <div class="flex items-center justify-between mb-2">
                   <span class="text-sm font-extrabold text-slate-800">الأسئلة المختارة للعبة (${this._selectedQIds.size} من ${bankQs.length}):</span>
@@ -3701,7 +3842,6 @@
 
         el.innerHTML = `
           <div class="bg-slate-950 text-white p-5 md:p-7 rounded-3xl shadow-2xl space-y-6">
-            <!-- Top Game HUD -->
             <div class="flex flex-wrap items-center justify-between gap-3 border-b border-white/10 pb-4">
               <div class="flex items-center gap-3">
                 <span class="px-3.5 py-1.5 rounded-xl bg-amber-400 text-brand-950 font-black text-sm">
@@ -3714,7 +3854,6 @@
               </button>
             </div>
 
-            <!-- Participants Score Strip / 2D Rocket Race Track -->
             ${gs.gameType === 'race' ? `
               <div class="bg-slate-900 p-4 rounded-2xl border border-white/10 space-y-3">
                 <div class="text-xs font-bold text-amber-300">🚀 مسار سباق الصواريخ (خط النهاية عند ${gs.questions.length} خطوات)</div>
@@ -3747,7 +3886,6 @@
               </div>
             `}
 
-            <!-- Game Stage: Box Grid OR Active Question -->
             ${gs.gameType === 'box' && !gs.currentQuestion ? `
               <div class="space-y-4">
                 <h3 class="text-center text-xl font-black text-amber-300">اختر صندوقًا من الصناديق التالية يا ${UI.escapeHtml(currentTurn.name)}:</h3>
@@ -3804,7 +3942,6 @@
               ${UI.escapeHtml(q.text)}
             </div>
 
-            <!-- Options (Do NOT show correct answer before teacher confirms!) -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
               ${q.options.map((opt, idx) => {
                 let cls = 'bg-slate-800 hover:bg-slate-700 border-slate-700 text-white';
@@ -3910,7 +4047,6 @@
 
         el.innerHTML = `
           <div class="flex flex-col gap-4 p-4">
-            <!-- Top: QR Camera Scanner -->
             <div class="bg-white p-4 rounded-3xl border border-slate-200 shadow-sm space-y-3">
               <div class="flex items-center justify-between">
                 <h3 class="text-sm font-black text-slate-900 flex items-center gap-1.5">
@@ -3936,7 +4072,6 @@
                 </div>
               </div>
 
-              <!-- Camera Viewport -->
               <div class="relative rounded-2xl overflow-hidden bg-slate-900 aspect-square max-h-56 mx-auto flex items-center justify-center">
                 <video id="qr-video" playsinline class="w-full h-full object-cover hidden"></video>
                 <canvas id="qr-hidden-canvas" class="hidden"></canvas>
@@ -3951,7 +4086,6 @@
               <div id="qr-scan-result" class="hidden"></div>
             </div>
 
-            <!-- Bottom: Quick Manual Award -->
             <div class="bg-white p-4 rounded-3xl border border-slate-200 shadow-sm space-y-3">
               <div class="flex flex-col gap-1">
                 <h3 class="text-sm font-black text-slate-900">النقاط اليدوية</h3>
@@ -4061,7 +4195,6 @@
           UI.toast('⚠️ تنبيه: تم مسح بطاقة طالب من فصل مختلف!', 'warning');
         }
 
-        // Instant award without confirmation popup
         this.confirmQrAward(student.id);
       },
 
@@ -4203,7 +4336,6 @@
 
         el.innerHTML = `
           <div class="space-y-6">
-            <!-- Filters Bar -->
             <div class="bg-white p-4 rounded-3xl border border-slate-200 shadow-sm flex flex-wrap items-center justify-between gap-3">
               <div class="flex flex-wrap gap-2">
                 <button onclick="AchievementsView._boardTarget='students'; App.renderCurrentView()" class="px-4 py-2 rounded-xl text-xs font-extrabold ${this._boardTarget === 'students' ? 'bg-brand-700 text-white' : 'bg-slate-100 text-slate-700'}">ترتيب الطلاب</button>
@@ -4233,11 +4365,9 @@
             ${items.length === 0 ? `
               <div class="bg-white p-10 rounded-3xl border border-slate-200 text-center font-bold text-slate-400">لا توجد بيانات لعرضها في هذا الفصل.</div>
             ` : (this._boardDisplay === 'podium' ? `
-              <!-- Top 3 Podium Stage -->
               <div class="bg-gradient-to-b from-brand-900 to-brand-950 text-white p-6 md:p-8 rounded-3xl shadow-xl">
                 <h3 class="text-center text-amber-400 font-black text-xl mb-6">🏅 مدرج المراكز الأولى</h3>
                 <div class="grid grid-cols-3 gap-3 md:gap-6 items-end max-w-2xl mx-auto pt-4">
-                  <!-- 2nd Place -->
                   <div class="text-center">
                     ${top3[1] ? `
                       <div class="font-extrabold text-sm md:text-base truncate mb-1">${UI.escapeHtml(top3[1].name)}</div>
@@ -4245,7 +4375,6 @@
                       <div class="h-28 bg-slate-300/20 border-t-4 border-slate-300 rounded-t-2xl flex items-center justify-center text-3xl font-black">2</div>
                     ` : '<div class="h-28"></div>'}
                   </div>
-                  <!-- 1st Place -->
                   <div class="text-center">
                     ${top3[0] ? `
                       <div class="text-3xl mb-1">👑</div>
@@ -4254,7 +4383,6 @@
                       <div class="h-36 bg-amber-400/25 border-t-4 border-amber-400 rounded-t-2xl flex items-center justify-center text-4xl font-black text-amber-300">1</div>
                     ` : ''}
                   </div>
-                  <!-- 3rd Place -->
                   <div class="text-center">
                     ${top3[2] ? `
                       <div class="font-extrabold text-sm md:text-base truncate mb-1">${UI.escapeHtml(top3[2].name)}</div>
@@ -4265,7 +4393,6 @@
                 </div>
               </div>
 
-              <!-- Full Honour Roll Cards -->
               <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                 ${items.map(it => `
                   <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between">
@@ -4280,7 +4407,6 @@
                 `).join('')}
               </div>
             ` : `
-              <!-- Bar Chart View -->
               <div class="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm space-y-4">
                 <h3 class="font-extrabold text-slate-900">الرسم البياني للقلوب ❤️</h3>
                 <div class="space-y-3">
@@ -4372,7 +4498,6 @@
 
         el.innerHTML = `
           <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
-            <!-- Controls -->
             <div class="lg:col-span-5 bg-white p-5 rounded-3xl border border-slate-200 shadow-sm space-y-4">
               <h3 class="text-lg font-black text-slate-900">إعداد شهادات التميز</h3>
 
@@ -4422,7 +4547,6 @@
               </button>
             </div>
 
-            <!-- Live Preview -->
             <div class="lg:col-span-7 bg-white p-5 rounded-3xl border border-slate-200 shadow-sm">
               <div class="text-xs font-bold text-slate-400 mb-3">معاينة حية للشهادة:</div>
               <div id="cert-preview-box">
