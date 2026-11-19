@@ -139,60 +139,22 @@
     </div>
   </div>
 
-  <!-- Teacher Cloud Authentication Gate -->
+  <!-- Teacher Cloud Authentication Gate (Google Sign-In Only) -->
   <div id="auth-gate-overlay" class="fixed inset-0 bg-gradient-to-br from-brand-950 via-brand-900 to-slate-950 z-[88] hidden items-center justify-center p-4 overflow-y-auto">
-    <div class="bg-white rounded-3xl shadow-2xl max-w-md w-full p-6 md:p-8 border border-brand-100 my-auto space-y-5">
-      <div class="text-center space-y-2">
+    <div class="bg-white rounded-3xl shadow-2xl max-w-md w-full p-6 md:p-8 border border-brand-100 my-auto space-y-6">
+      <div class="text-center space-y-2.5">
         <div class="w-16 h-16 rounded-3xl bg-amber-400 text-brand-950 flex items-center justify-center shadow-lg mx-auto">
           <i data-lucide="graduation-cap" class="w-9 h-9"></i>
         </div>
         <h2 class="text-2xl font-black text-slate-900">مساحة صفّي</h2>
-        <p class="text-xs text-slate-500 font-semibold">سجّل الدخول بنفس الحساب في اللابتوب والآيباد والجوال لمزامنة فصولك وقلوب الطلاب لحظيًا</p>
-      </div>
-
-      <div class="grid grid-cols-2 gap-1.5 bg-slate-100 p-1 rounded-2xl">
-        <button id="gate-tab-login" onclick="App.setGateAuthMode(false)" class="py-2 rounded-xl font-extrabold text-xs bg-white text-brand-900 shadow-sm transition">
-          تسجيل الدخول
-        </button>
-        <button id="gate-tab-register" onclick="App.setGateAuthMode(true)" class="py-2 rounded-xl font-extrabold text-xs text-slate-600 hover:text-slate-900 transition">
-          إنشاء حساب معلم
-        </button>
+        <p class="text-xs text-slate-500 font-semibold leading-relaxed">
+          سجّل الدخول بحساب Google نفسه في اللابتوب والآيباد والجوال لمزامنة فصولك وكتبك وقلوب الطلاب لحظيًا
+        </p>
       </div>
 
       <div id="gate-cloud-form" class="space-y-3">
-        <div>
-          <label class="block text-xs font-bold text-slate-700 mb-1">البريد الإلكتروني</label>
-          <input id="gate-email" type="email" placeholder="teacher@school.edu.kw" dir="ltr" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-brand-600 outline-none text-sm font-bold text-left" />
-        </div>
-        <div>
-          <div class="flex items-center justify-between mb-1">
-            <label class="block text-xs font-bold text-slate-700">كلمة المرور</label>
-            <button type="button" onclick="App.sendGatePasswordReset()" class="text-[11px] font-bold text-brand-700 hover:underline">
-              نسيت / تعيين كلمة مرور لبريدي؟
-            </button>
-          </div>
-          <input id="gate-pass" type="password" placeholder="••••••••" dir="ltr" onkeydown="if(event.key==='Enter') App.submitGateAuth()" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-brand-600 outline-none text-sm font-bold text-left" />
-        </div>
-
-        <div id="gate-reset-helper" class="hidden p-3 rounded-2xl bg-amber-50 border border-amber-300 text-xs text-amber-950 space-y-2">
-          <p class="font-bold leading-relaxed">⚠️ هذا البريد مسجّل مسبقًا في النظام (إما بكلمة مرور سابقة أو عبر Google).</p>
-          <button type="button" onclick="App.sendGatePasswordReset()" class="w-full py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-brand-950 font-black text-xs">
-            📩 إرسال رابط تعيين كلمة مرور جديدة لبريدي الآن
-          </button>
-        </div>
-
-        <button id="gate-submit-btn" onclick="App.submitGateAuth()" class="w-full py-3.5 rounded-2xl bg-brand-700 hover:bg-brand-800 text-white font-black text-sm shadow-lg shadow-brand-200 transition">
-          دخول ومزامنة البيانات سحابيًا
-        </button>
-
-        <div class="relative flex py-1 items-center">
-          <div class="flex-grow border-t border-slate-200"></div>
-          <span class="flex-shrink mx-3 text-[11px] font-bold text-slate-400">أو</span>
-          <div class="flex-grow border-t border-slate-200"></div>
-        </div>
-
-        <button onclick="App.submitGateGoogle()" class="w-full py-3 rounded-2xl border-2 border-slate-200 hover:bg-slate-50 text-slate-800 font-extrabold text-sm flex items-center justify-center gap-2 transition">
-          <i data-lucide="globe" class="w-4 h-4 text-brand-700"></i>
+        <button onclick="App.submitGateGoogle()" class="w-full py-4 px-5 rounded-2xl bg-brand-700 hover:bg-brand-800 text-white font-black text-base shadow-lg shadow-brand-200 flex items-center justify-center gap-3 transition transform active:scale-[0.99]">
+          <span class="w-8 h-8 rounded-xl bg-white text-brand-900 flex items-center justify-center font-black text-lg shadow-sm">G</span>
           <span>المتابعة بحساب Google</span>
         </button>
       </div>
@@ -448,19 +410,13 @@
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
     import {
       getAuth,
-      signInWithEmailAndPassword,
-      createUserWithEmailAndPassword,
       signInWithPopup,
       signInWithRedirect,
       getRedirectResult,
       GoogleAuthProvider,
       signOut,
       onAuthStateChanged,
-      signInWithCustomToken,
-      sendPasswordResetEmail,
-      EmailAuthProvider,
-      linkWithCredential,
-      updatePassword
+      signInWithCustomToken
     } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
     import {
       initializeFirestore,
@@ -715,12 +671,6 @@
         return true;
       },
 
-      async loginEmail(email, pass, isRegister) {
-        if (!this.auth) throw new Error("يرجى إدخال إعدادات Firebase Config أولاً لتفعيل السحابة.");
-        if (isRegister) return await createUserWithEmailAndPassword(this.auth, email, pass);
-        return await signInWithEmailAndPassword(this.auth, email, pass);
-      },
-
       async loginGoogle() {
         if (!this.auth) throw new Error("يرجى إدخال إعدادات Firebase Config أولاً لتفعيل السحابة.");
         const provider = new GoogleAuthProvider();
@@ -733,23 +683,6 @@
             return null;
           }
           throw err;
-        }
-      },
-
-      async sendPasswordReset(email) {
-        if (!this.auth) throw new Error("اتصال السحابة غير مفعّل.");
-        await sendPasswordResetEmail(this.auth, email);
-      },
-
-      async attachOrUpdatePassword(newPassword) {
-        if (!this.auth || !this.auth.currentUser) throw new Error("لا يوجد حساب مسجل الدخول حاليًا.");
-        const user = this.auth.currentUser;
-        const hasPasswordProvider = user.providerData.some(p => p.providerId === 'password');
-        if (hasPasswordProvider) {
-          await updatePassword(user, newPassword);
-        } else if (user.email) {
-          const cred = EmailAuthProvider.credential(user.email, newPassword);
-          await linkWithCredential(user, cred);
         }
       },
 
@@ -817,42 +750,130 @@
             gain.gain.setValueAtTime(0.06, now);
             gain.gain.exponentialRampToValueAtTime(0.001, now + 0.04);
             osc.start(now); osc.stop(now + 0.05);
+          } else if (type === 'wheelTick') {
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(920, now);
+            osc.frequency.exponentialRampToValueAtTime(340, now + 0.035);
+            gain.gain.setValueAtTime(0.16, now);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + 0.04);
+            osc.start(now); osc.stop(now + 0.045);
           } else if (type === 'win') {
-            [523.25, 659.25, 783.99, 1046.5].forEach((freq, idx) => {
-              const o = this.ctx.createOscillator();
-              const g = this.ctx.createGain();
-              o.connect(g); g.connect(this.ctx.destination);
-              o.type = 'triangle';
-              o.frequency.setValueAtTime(freq, now + idx * 0.09);
-              g.gain.setValueAtTime(0.15, now + idx * 0.09);
-              g.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.09 + 0.35);
-              o.start(now + idx * 0.09); o.stop(now + idx * 0.09 + 0.36);
-            });
-          } else if (type === 'alarm') {
-            [880, 660, 880, 660].forEach((freq, idx) => {
-              const o = this.ctx.createOscillator();
-              const g = this.ctx.createGain();
-              o.connect(g); g.connect(this.ctx.destination);
-              o.type = 'sine';
-              o.frequency.setValueAtTime(freq, now + idx * 0.18);
-              g.gain.setValueAtTime(0.2, now + idx * 0.18);
-              g.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.18 + 0.16);
-              o.start(now + idx * 0.18); o.stop(now + idx * 0.18 + 0.17);
-            });
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(523.25, now);
+            osc.frequency.setValueAtTime(659.25, now + 0.1);
+            osc.frequency.setValueAtTime(783.99, now + 0.2);
+            osc.frequency.setValueAtTime(1046.5, now + 0.3);
+            gain.gain.setValueAtTime(0.2, now);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + 0.55);
+            osc.start(now); osc.stop(now + 0.56);
           } else if (type === 'wrong') {
             osc.type = 'sawtooth';
             osc.frequency.setValueAtTime(220, now);
-            osc.frequency.linearRampToValueAtTime(140, now + 0.25);
+            osc.frequency.linearRampToValueAtTime(150, now + 0.25);
             gain.gain.setValueAtTime(0.12, now);
             gain.gain.exponentialRampToValueAtTime(0.001, now + 0.28);
             osc.start(now); osc.stop(now + 0.3);
+          } else if (type === 'alarm') {
+            osc.type = 'square';
+            osc.frequency.setValueAtTime(880, now);
+            osc.frequency.setValueAtTime(660, now + 0.15);
+            osc.frequency.setValueAtTime(880, now + 0.3);
+            gain.gain.setValueAtTime(0.16, now);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + 0.55);
+            osc.start(now); osc.stop(now + 0.56);
           }
-        } catch (e) {}
+        } catch (e) { /* Ignore autoplay restriction */ }
       }
     };
 
     /* ==========================================================================
-       2. INDEXEDDB BINARY FILE STORE
+       2. UI UTILITIES (Modals, Toasts, Escaping)
+       ========================================================================== */
+    const UI = {
+      escapeHtml(str) {
+        if (str === null || str === undefined) return '';
+        return String(str)
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;')
+          .replace(/'/g, '&#39;');
+      },
+      uid(prefix = 'id') {
+        return `${prefix}_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 7)}`;
+      },
+      qrToken() {
+        const arr = new Uint8Array(8);
+        crypto.getRandomValues(arr);
+        return 'MSQ-' + Array.from(arr, b => b.toString(16).padStart(2, '0')).join('').toUpperCase();
+      },
+      toast(msg, type = 'info') {
+        const container = document.getElementById('toast-container');
+        if (!container) return;
+        const colors = {
+          success: 'bg-emerald-600 text-white border-emerald-400',
+          error: 'bg-rose-600 text-white border-rose-400',
+          warning: 'bg-amber-500 text-brand-950 border-amber-300',
+          info: 'bg-brand-900 text-white border-brand-700'
+        };
+        const el = document.createElement('div');
+        el.className = `pointer-events-auto px-4 py-3 rounded-2xl shadow-xl border font-bold text-xs md:text-sm flex items-center gap-2.5 transition-all transform translate-y-2 opacity-0 ${colors[type] || colors.info}`;
+        el.innerHTML = `<span>${this.escapeHtml(msg)}</span>`;
+        container.appendChild(el);
+        requestAnimationFrame(() => {
+          el.classList.remove('translate-y-2', 'opacity-0');
+        });
+        setTimeout(() => {
+          el.classList.add('opacity-0', 'translate-y-2');
+          setTimeout(() => el.remove(), 300);
+        }, 3800);
+      },
+      openModal({ title, bodyHtml, actions = [] }) {
+        document.getElementById('modal-title').textContent = title;
+        document.getElementById('modal-body').innerHTML = bodyHtml;
+        const actEl = document.getElementById('modal-actions');
+        actEl.innerHTML = '';
+        actions.forEach(a => {
+          const btn = document.createElement('button');
+          btn.textContent = a.label;
+          btn.className = a.className || 'px-5 py-2.5 rounded-xl bg-brand-700 hover:bg-brand-800 text-white font-bold text-sm transition';
+          btn.onclick = () => {
+            if (a.onClick) a.onClick();
+            if (a.closeOnClick !== false) this.closeModal();
+          };
+          actEl.appendChild(btn);
+        });
+        const backdrop = document.getElementById('modal-backdrop');
+        backdrop.classList.remove('hidden');
+        backdrop.classList.add('flex');
+        if (window.lucide) lucide.createIcons();
+      },
+      closeModal() {
+        const backdrop = document.getElementById('modal-backdrop');
+        backdrop.classList.add('hidden');
+        backdrop.classList.remove('flex');
+      },
+      confirm(title, message, onConfirm) {
+        this.openModal({
+          title,
+          bodyHtml: `<p class="text-slate-700 font-semibold">${this.escapeHtml(message)}</p>`,
+          actions: [
+            { label: 'إلغاء', className: 'px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-sm' },
+            { label: 'تأكيد', className: 'px-5 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-bold text-sm', onClick: onConfirm }
+          ]
+        });
+      },
+      toggleMobileNav() {
+        const nav = document.getElementById('sidebar-nav');
+        const foot = document.getElementById('sidebar-footer');
+        nav.classList.toggle('hidden');
+        nav.classList.toggle('flex');
+        foot.classList.toggle('hidden');
+      }
+    };
+
+    /* ==========================================================================
+       3. INDEXEDDB FILE STORAGE (Large PDFs, PPTX, Word, Images)
        ========================================================================== */
     const FileDB = {
       dbName: 'MasahatSaffiFilesDB',
@@ -860,7 +881,9 @@
       open() {
         return new Promise((resolve, reject) => {
           const req = indexedDB.open(this.dbName, 1);
-          req.onupgradeneeded = () => req.result.createObjectStore(this.storeName);
+          req.onupgradeneeded = () => {
+            req.result.createObjectStore(this.storeName);
+          };
           req.onsuccess = () => resolve(req.result);
           req.onerror = () => reject(req.error);
         });
@@ -885,184 +908,52 @@
       },
       async deleteFile(id) {
         const db = await this.open();
-        return new Promise((resolve) => {
+        return new Promise((resolve, reject) => {
           const tx = db.transaction(this.storeName, 'readwrite');
           tx.objectStore(this.storeName).delete(id);
           tx.oncomplete = () => resolve(true);
+          tx.onerror = () => reject(tx.error);
         });
       }
     };
 
     /* ==========================================================================
-       3. UI HELPERS
+       4. CENTRAL APPLICATION STATE & SYNC CONTROLLER
        ========================================================================== */
-    const UI = {
-      toast(msg, type = 'info') {
-        const colors = {
-          success: 'bg-emerald-600 text-white',
-          error: 'bg-rose-600 text-white',
-          warning: 'bg-amber-500 text-brand-950 font-extrabold',
-          info: 'bg-brand-900 text-white'
-        };
-        const el = document.createElement('div');
-        el.className = `${colors[type] || colors.info} px-4 py-3 rounded-2xl shadow-xl text-sm font-bold flex items-center gap-2 pointer-events-auto transform transition-all duration-300`;
-        el.innerHTML = `<span>${msg}</span>`;
-        const container = document.getElementById('toast-container');
-        container.appendChild(el);
-        setTimeout(() => {
-          el.style.opacity = '0';
-          el.style.transform = 'translateY(10px)';
-          setTimeout(() => el.remove(), 300);
-        }, 4500);
-      },
-
-      openModal({ title, bodyHtml, actions = [] }) {
-        document.getElementById('modal-title').textContent = title;
-        document.getElementById('modal-body').innerHTML = bodyHtml;
-        const actEl = document.getElementById('modal-actions');
-        actEl.innerHTML = '';
-        actions.forEach(btn => {
-          const b = document.createElement('button');
-          b.className = btn.className || 'px-5 py-2.5 rounded-xl bg-brand-700 text-white font-bold hover:bg-brand-800';
-          b.textContent = btn.label;
-          b.onclick = () => {
-            if (btn.onClick) btn.onClick();
-            if (btn.closeOnClick !== false) UI.closeModal();
-          };
-          actEl.appendChild(b);
-        });
-        const backdrop = document.getElementById('modal-backdrop');
-        backdrop.classList.remove('hidden');
-        backdrop.classList.add('flex');
-        lucide.createIcons();
-      },
-
-      closeModal() {
-        const backdrop = document.getElementById('modal-backdrop');
-        backdrop.classList.add('hidden');
-        backdrop.classList.remove('flex');
-      },
-
-      confirm(title, message, onConfirm) {
-        this.openModal({
-          title,
-          bodyHtml: `<p class="text-slate-700 font-medium">${message}</p>`,
-          actions: [
-            { label: 'إلغاء', className: 'px-4 py-2.5 rounded-xl bg-slate-100 text-slate-700 font-bold hover:bg-slate-200' },
-            { label: 'نعم، تأكيد', className: 'px-5 py-2.5 rounded-xl bg-rose-600 text-white font-bold hover:bg-rose-700', onClick: onConfirm }
-          ]
-        });
-      },
-
-      toggleMobileNav() {
-        const nav = document.getElementById('sidebar-nav');
-        const foot = document.getElementById('sidebar-footer');
-        nav.classList.toggle('hidden');
-        nav.classList.toggle('flex');
-        foot.classList.toggle('hidden');
-      },
-
-      uid(prefix = 'id') {
-        return `${prefix}_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 8)}`;
-      },
-
-      qrToken() {
-        const arr = new Uint8Array(12);
-        crypto.getRandomValues(arr);
-        return 'MSQ-' + Array.from(arr, b => b.toString(16).padStart(2, '0')).join('').toUpperCase();
-      },
-
-      escapeHtml(str) {
-        if (!str) return '';
-        return String(str).replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m]));
-      }
-    };
-
-    /* ==========================================================================
-       4. MAIN APPLICATION STATE & CONTROLLER
-       ========================================================================== */
-    const DEFAULT_STATE = () => ({
-      onboarded: false,
-      settings: {
-        platformName: 'مساحة صفّي',
-        teacherName: '',
-        schoolName: '',
-        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || 'Asia/Kuwait',
-        soundEnabled: true,
-        reduceMotion: false,
-        isDemoData: false
-      },
-      subjects: [],
-      classes: [],
-      students: [],
-      books: [],
-      annotations: {},
-      questions: [],
-      schedule: {
-        days: ['الأحد', 'الاثنين', 'الثلاثاء', 'الأربعاء', 'الخميس'],
-        periods: [
-          { id: 'p1', name: 'الحصة الأولى', start: '07:30', end: '08:15' },
-          { id: 'p2', name: 'الحصة الثانية', start: '08:20', end: '09:05' },
-          { id: 'p3', name: 'الحصة الثالثة', start: '09:10', end: '09:55' },
-          { id: 'p4', name: 'الحصة الرابعة', start: '10:15', end: '11:00' },
-          { id: 'p5', name: 'الحصة الخامسة', start: '11:05', end: '11:50' },
-          { id: 'p6', name: 'الحصة السادسة', start: '11:55', end: '12:40' }
-        ],
-        slots: {}
-      },
-      groupsByClass: {},
-      heartLedger: [],
-      wheelState: {},
-      liveSession: {
-        activeClassId: null,
-        activeSubjectId: null,
-        activePeriodId: null,
-        trafficLight: 'green'
-      },
-      timerState: {
-        totalSec: 300,
-        remainingSec: 300,
-        running: false,
-        endTimestamp: null
-      }
-    });
-
     const App = {
+      STORAGE_KEY: 'masahat_saffi_state_v2',
+      cloudUser: null,
+      _cloudHydrated: false,
+      _applyingRemote: false,
+      explicitLocalSession: sessionStorage.getItem('masahat_local_session') === '1',
+      deviceSessionId: UI.uid('dev'),
+
       mainTab: 'lesson',
       prepSubTab: 'classes',
       lessonMainTab: 'viewer',
       lessonSideTab: 'points',
       achSubTab: 'board',
 
-      activeClassId: null,
-      activeSubjectId: null,
-      activePeriodId: null,
-      trafficLight: 'green',
-      isDemoMode: true,
-      explicitLocalSession: false,
-      gateIsRegister: false,
-      deviceSessionId: 'dev_' + Math.random().toString(36).slice(2, 10),
-      cloudUser: null,
-      syncStatus: 'local',
-      _cloudHydrated: false,
-      recentTxIds: new Set(),
-      _knownLedgerIds: new Set(),
-
-      state: DEFAULT_STATE(),
+      activeClassId: '',
+      activeSubjectId: '',
+      activePeriodName: 'تلقائي',
+      pendingScheduledSlot: null,
+      lessonStartTime: Date.now(),
 
       timer: {
         totalSec: 300,
         remainingSec: 300,
         running: false,
-        interval: null
+        intervalId: null
       },
 
       viewerState: {
-        bookId: null,
+        bookId: '',
+        pdfDoc: null,
+        _loadedBookId: '',
         pageNum: 1,
         numPages: 1,
-        scale: 1.25,
-        pdfDoc: null,
+        scale: 1.15,
         tool: 'pen',
         color: '#ef4444',
         lineWidth: 4,
@@ -1072,7 +963,7 @@
 
       gameState: {
         active: false,
-        gameType: 'box',
+        gameType: 'race',
         mode: 'groups',
         participants: [],
         turnIndex: 0,
@@ -1082,57 +973,62 @@
         currentQuestion: null,
         selectedOption: null,
         revealed: false,
-        pointsPerQ: 5
+        pointsPerQ: 5,
+        lastBoostedIdx: -1
+      },
+
+      state: {
+        onboarded: false,
+        settings: {
+          platformName: 'مساحة صفّي',
+          teacherName: '',
+          schoolName: '',
+          timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || 'Asia/Kuwait',
+          soundEnabled: true,
+          reduceMotion: false,
+          trafficLight: 'green'
+        },
+        subjects: [],
+        classes: [],
+        students: [],
+        schedule: {
+          days: ['الأحد', 'الإثنين', 'الثلاثاء', 'الأربعاء', 'الخميس'],
+          periods: [
+            { id: 'p1', name: 'الحصة 1', start: '07:30', end: '08:15' },
+            { id: 'p2', name: 'الحصة 2', start: '08:20', end: '09:05' },
+            { id: 'p3', name: 'الحصة 3', start: '09:10', end: '09:55' },
+            { id: 'p4', name: 'الحصة 4', start: '10:15', end: '11:00' },
+            { id: 'p5', name: 'الحصة 5', start: '11:05', end: '11:50' },
+            { id: 'p6', name: 'الحصة 6', start: '11:55', end: '12:40' }
+          ],
+          slots: {}
+        },
+        books: [],
+        annotations: {},
+        questions: [],
+        groupsByClass: {},
+        wheelState: {},
+        heartLedger: []
       },
 
       init() {
-        this.loadLocalState();
         this.populateTimezones();
-
-        this.explicitLocalSession = sessionStorage.getItem('masahat_local_session') === '1';
-        this.state.heartLedger.forEach(tx => this._knownLedgerIds.add(tx.id));
-
-        if (!this.cloudUser && !this.explicitLocalSession) {
-          this.showAuthGate();
-        } else if (!this.state.onboarded) {
-          this.showOnboarding();
-        }
-
-        if (this.state.liveSession) {
-          if (this.state.liveSession.activeClassId && this.state.classes.some(c => c.id === this.state.liveSession.activeClassId)) {
-            this.activeClassId = this.state.liveSession.activeClassId;
-          }
-          if (this.state.liveSession.activeSubjectId && this.state.subjects.some(s => s.id === this.state.liveSession.activeSubjectId)) {
-            this.activeSubjectId = this.state.liveSession.activeSubjectId;
-          }
-          if (this.state.liveSession.trafficLight) {
-            this.trafficLight = this.state.liveSession.trafficLight;
-          }
-        }
-
-        if (this.state.timerState) {
-          this.timer.totalSec = this.state.timerState.totalSec || 300;
-          if (this.state.timerState.running && this.state.timerState.endTimestamp) {
-            const rem = Math.max(0, Math.ceil((this.state.timerState.endTimestamp - Date.now()) / 1000));
-            this.timer.remainingSec = rem;
-            if (rem > 0) {
-              this.startTimer(true);
-            } else {
-              this.timer.running = false;
-            }
-          } else {
-            this.timer.remainingSec = this.state.timerState.remainingSec ?? this.timer.totalSec;
-          }
-        }
-
+        this.loadLocalState();
         this.ensureActiveSelections();
         this.applyPreferences();
         this.updateHeaderSelectors();
-        this.setTrafficLight(this.trafficLight, true);
-        this.setMainTab('lesson');
-        this.startClockAndScheduleWatcher();
-        this.updateTimerDisplay();
-        this.updateSyncBadge();
+        this.autoDetectSchedule(false);
+        this.startClockLoop();
+
+        if (this.cloudUser || this.explicitLocalSession) {
+          this.hideAuthGate();
+          if (!this.state.onboarded) {
+            this.showOnboarding();
+          }
+        } else {
+          this.showAuthGate();
+        }
+        this.renderCurrentView();
         lucide.createIcons();
       },
 
@@ -1140,243 +1036,93 @@
         const sel = document.getElementById('ob-timezone');
         if (!sel) return;
         const zones = [
-          { id: 'Asia/Kuwait', label: 'الكويت (Asia/Kuwait)' },
-          { id: 'Asia/Riyadh', label: 'الرياض / مكة المكرمة (Asia/Riyadh)' },
-          { id: 'Asia/Dubai', label: 'أبوظبي / دبي (Asia/Dubai)' },
-          { id: 'Asia/Qatar', label: 'الدوحة (Asia/Qatar)' },
-          { id: 'Asia/Bahrain', label: 'المنامة (Asia/Bahrain)' },
-          { id: 'Asia/Muscat', label: 'مسقط (Asia/Muscat)' },
-          { id: 'Asia/Amman', label: 'عمّان (Asia/Amman)' },
-          { id: 'Africa/Cairo', label: 'القاهرة (Africa/Cairo)' }
+          'Asia/Kuwait', 'Asia/Riyadh', 'Asia/Dubai', 'Asia/Qatar', 'Asia/Bahrain',
+          'Asia/Muscat', 'Asia/Amman', 'Africa/Cairo', 'Asia/Baghdad', 'Asia/Beirut'
         ];
-        const cur = this.state.settings.timezone || 'Asia/Kuwait';
-        if (!zones.some(z => z.id === cur)) {
-          zones.unshift({ id: cur, label: cur });
-        }
-        sel.innerHTML = zones.map(z =>
-          `<option value="${z.id}" ${z.id === cur ? 'selected' : ''}>${z.label}</option>`
-        ).join('');
-      },
-
-      onFirebaseBridgeReady() {
-        if (!this.cloudUser && !this.explicitLocalSession) {
-          this.showAuthGate();
-        }
-        this.updateSyncBadge();
+        const current = this.state.settings.timezone || 'Asia/Kuwait';
+        if (!zones.includes(current)) zones.unshift(current);
+        sel.innerHTML = zones.map(z => `<option value="${z}" ${z === current ? 'selected' : ''}>${z}</option>`).join('');
       },
 
       showAuthGate() {
-        const gate = document.getElementById('auth-gate-overlay');
-        if (gate) {
-          gate.classList.remove('hidden');
-          gate.classList.add('flex');
-          lucide.createIcons();
+        const el = document.getElementById('auth-gate-overlay');
+        if (el) {
+          el.classList.remove('hidden');
+          el.classList.add('flex');
         }
       },
 
       hideAuthGate() {
-        const gate = document.getElementById('auth-gate-overlay');
-        if (gate) {
-          gate.classList.add('hidden');
-          gate.classList.remove('flex');
+        const el = document.getElementById('auth-gate-overlay');
+        if (el) {
+          el.classList.add('hidden');
+          el.classList.remove('flex');
         }
       },
 
-      setGateAuthMode(isRegister) {
-        this.gateIsRegister = isRegister;
-        const loginTab = document.getElementById('gate-tab-login');
-        const regTab = document.getElementById('gate-tab-register');
-        const submitBtn = document.getElementById('gate-submit-btn');
-        const helper = document.getElementById('gate-reset-helper');
-        if (helper) helper.classList.add('hidden');
-
-        if (isRegister) {
-          regTab.className = 'py-2 rounded-xl font-extrabold text-xs bg-white text-brand-900 shadow-sm transition';
-          loginTab.className = 'py-2 rounded-xl font-extrabold text-xs text-slate-600 hover:text-slate-900 transition';
-          submitBtn.textContent = 'إنشاء حساب معلم جديد وبدء المزامنة';
-        } else {
-          loginTab.className = 'py-2 rounded-xl font-extrabold text-xs bg-white text-brand-900 shadow-sm transition';
-          regTab.className = 'py-2 rounded-xl font-extrabold text-xs text-slate-600 hover:text-slate-900 transition';
-          submitBtn.textContent = 'دخول ومزامنة البيانات سحابيًا';
+      showOnboarding() {
+        const el = document.getElementById('onboarding-overlay');
+        if (el) {
+          el.classList.remove('hidden');
+          el.classList.add('flex');
         }
       },
 
-      formatAuthError(e) {
-        const code = e?.code || '';
-        const helper = document.getElementById('gate-reset-helper');
-        if (code === 'auth/email-already-in-use') {
-          if (helper) helper.classList.remove('hidden');
-          return 'هذا البريد مسجّل مسبقًا — اضغط زر إرسال رابط تعيين كلمة المرور أو ادخل بحساب Google.';
-        }
-        if (code === 'auth/invalid-credential' || code === 'auth/wrong-password' || code === 'auth/user-not-found') {
-          if (helper) helper.classList.remove('hidden');
-          return 'كلمة المرور غير صحيحة، أو أن حسابك مسجل عبر Google فقط — اضغط «نسيت / تعيين كلمة مرور لبريدي؟» أو ادخل بحساب Google.';
-        }
-        if (code === 'auth/weak-password') return 'كلمة المرور ضعيفة؛ يجب أن تكون 6 أحرف أو أرقام على الأقل.';
-        if (code === 'auth/invalid-email') return 'صيغة البريد الإلكتروني غير صحيحة.';
-        if (code === 'auth/operation-not-allowed') return 'طريقة الدخول هذه غير مفعّلة في إعدادات مشروع Firebase (فعّلها من Authentication > Sign-in method).';
-        if (code === 'auth/unauthorized-domain') return `هذا النطاق (${window.location.hostname}) غير مضاف في Firebase (أضفه في Authentication > Settings > Authorized domains).`;
-        if (code === 'auth/popup-closed-by-user') return 'تم إغلاق نافذة تسجيل الدخول قبل إكمال العملية.';
-        if (code === 'auth/popup-blocked') return 'المتصفح حظر النافذة المنبثقة — جارٍ التحويل لصفحة دخول Google...';
-        return e?.message || 'تعذر تسجيل الدخول السحابي.';
-      },
-
-      async submitGateAuth() {
-        const email = document.getElementById('gate-email')?.value.trim();
-        const pass = document.getElementById('gate-pass')?.value;
-        if (!email || !pass) return UI.toast('يرجى إدخال البريد الإلكتروني وكلمة المرور', 'warning');
-        if (!window.FirebaseBridge?.available) {
-          document.getElementById('gate-config-notice')?.classList.remove('hidden');
-          return UI.toast('يرجى ربط إعدادات Firebase أولاً أو اختيار الوضع التجريبي المحلي', 'warning');
-        }
-        const btn = document.getElementById('gate-submit-btn');
-        const origText = btn.textContent;
-        btn.disabled = true;
-        btn.textContent = 'جارٍ الاتصال بالسحابة...';
-        try {
-          await window.FirebaseBridge.loginEmail(email, pass, this.gateIsRegister);
-          sessionStorage.removeItem('masahat_local_session');
-          this.explicitLocalSession = false;
-          this.hideAuthGate();
-          UI.toast(this.gateIsRegister ? 'تم إنشاء حساب المعلم وتفعيل المزامنة السحابية!' : 'تم تسجيل الدخول وتفعيل المزامنة السحابية!', 'success');
-        } catch (e) {
-          UI.toast(this.formatAuthError(e), 'error');
-        } finally {
-          btn.disabled = false;
-          btn.textContent = origText;
-        }
-      },
-
-      async sendGatePasswordReset() {
-        const email = document.getElementById('gate-email')?.value.trim();
-        if (!email) return UI.toast('اكتب بريدك الإلكتروني في الخانة أعلاه أولاً ثم اضغط تعيين كلمة المرور', 'warning');
-        try {
-          await window.FirebaseBridge.sendPasswordReset(email);
-          UI.toast(`تم إرسال رابط تعيين كلمة المرور إلى ${email} — تفقد البريد الوارد أو الرسائل غير المرغوب فيها`, 'success');
-        } catch (e) {
-          UI.toast(this.formatAuthError(e), 'error');
-        }
-      },
-
-      async setAccountPassword() {
-        const newPass = document.getElementById('link-new-pass')?.value;
-        if (!newPass || newPass.length < 6) {
-          return UI.toast('يجب أن تتكون كلمة المرور من 6 أحرف أو أرقام على الأقل', 'warning');
-        }
-        try {
-          await window.FirebaseBridge.attachOrUpdatePassword(newPass);
-          UI.closeModal();
-          UI.toast('تم تعيين كلمة المرور بنجاح! يمكنك الآن الدخول بالبريد وكلمة المرور أو بحساب Google.', 'success');
-        } catch (e) {
-          if (e?.code === 'auth/requires-recent-login') {
-            UI.toast('لأسباب أمنية، سجّل الخروج ثم ادخل بحساب Google وأعد تعيين كلمة المرور مباشرة.', 'warning');
-          } else {
-            UI.toast(this.formatAuthError(e), 'error');
-          }
+      hideOnboarding() {
+        const el = document.getElementById('onboarding-overlay');
+        if (el) {
+          el.classList.add('hidden');
+          el.classList.remove('flex');
         }
       },
 
       async submitGateGoogle() {
-        if (!window.FirebaseBridge?.available) {
-          document.getElementById('gate-config-notice')?.classList.remove('hidden');
-          return UI.toast('يرجى ربط إعدادات Firebase أولاً أو اختيار الوضع التجريبي المحلي', 'warning');
-        }
-        try {
-          const res = await window.FirebaseBridge.loginGoogle();
-          if (res) {
-            sessionStorage.removeItem('masahat_local_session');
-            this.explicitLocalSession = false;
-            this.hideAuthGate();
-            UI.toast('تم الدخول بحساب Google وتفعيل المزامنة السحابية!', 'success');
-          }
-        } catch (e) {
-          UI.toast(this.formatAuthError(e), 'error');
-        }
+        await this.handleGoogleAuth();
       },
 
       saveGateFirebaseConfig() {
         try {
-          const raw = document.getElementById('gate-fb-cfg')?.value.trim();
+          const raw = document.getElementById('gate-fb-cfg').value.trim();
           const cfg = JSON.parse(raw);
           localStorage.setItem('masahat_firebase_cfg', JSON.stringify(cfg));
           const ok = window.FirebaseBridge.init(cfg);
           if (ok) {
-            document.getElementById('gate-config-notice')?.classList.add('hidden');
-            UI.toast('تم ربط إعدادات Firebase بنجاح! يمكنك الآن تسجيل الدخول.', 'success');
+            UI.toast('تم تفعيل الاتصال السحابي! اضغط المتابعة بحساب Google الآن.', 'success');
           } else {
             UI.toast('تعذر تهيئة Firebase من الإعدادات المدخلة.', 'error');
           }
-        } catch {
-          UI.toast('صيغة JSON غير صحيحة في إعدادات Firebase.', 'error');
+        } catch (e) {
+          UI.toast('صيغة JSON غير صحيحة.', 'error');
         }
       },
 
       enterLocalDemoMode() {
-        this.explicitLocalSession = true;
         sessionStorage.setItem('masahat_local_session', '1');
+        this.explicitLocalSession = true;
         this.hideAuthGate();
-        this.setSyncStatus('local', 'وضع محلي غير متصل');
+        this.setSyncStatus('local');
         if (!this.state.onboarded) {
           this.showOnboarding();
         }
-        UI.toast('تم الدخول في الوضع المحلي (التخزين على هذا الجهاز فقط)', 'info');
+        this.renderCurrentView();
       },
 
-      setSyncStatus(status, customLabel = null) {
-        this.syncStatus = status;
-        this.updateSyncBadge(customLabel);
-      },
-
-      updateSyncBadge(customLabel = null) {
-        const badge = document.getElementById('sync-badge');
-        const pill = document.getElementById('top-sync-pill');
-        const emailLabel = this.cloudUser?.email ? `متصل: ${this.cloudUser.email}` : 'متصل ومتزامن سحابيًا';
-        const configs = {
-          cloud: {
-            text: customLabel || emailLabel,
-            dot: 'bg-emerald-400',
-            sideCls: 'inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-500/20 text-emerald-300',
-            pillCls: 'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-2xl text-xs font-extrabold bg-emerald-100 text-emerald-900 border border-emerald-300 transition max-w-[230px]'
-          },
-          syncing: {
-            text: customLabel || 'جارٍ المزامنة...',
-            dot: 'bg-sky-400 animate-ping',
-            sideCls: 'inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-sky-500/20 text-sky-300',
-            pillCls: 'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-2xl text-xs font-extrabold bg-sky-100 text-sky-900 border border-sky-300 transition max-w-[230px]'
-          },
-          error: {
-            text: customLabel || 'خطأ في المزامنة',
-            dot: 'bg-rose-500',
-            sideCls: 'inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-rose-500/20 text-rose-300',
-            pillCls: 'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-2xl text-xs font-extrabold bg-rose-100 text-rose-900 border border-rose-300 transition max-w-[230px]'
-          },
-          local: {
-            text: customLabel || 'وضع محلي غير متصل',
-            dot: 'bg-amber-400',
-            sideCls: 'inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-amber-400/20 text-amber-300',
-            pillCls: 'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-2xl text-xs font-extrabold bg-amber-100 text-amber-900 border border-amber-300 transition max-w-[230px]'
-          }
-        };
-        const c = configs[this.syncStatus] || configs.local;
-        if (badge) {
-          badge.className = c.sideCls;
-          badge.innerHTML = `<span class="w-2 h-2 rounded-full ${c.dot}"></span><span class="truncate max-w-[140px]">${c.text}</span>`;
-        }
-        if (pill) {
-          pill.className = c.pillCls;
-          pill.innerHTML = `<span class="w-2 h-2 rounded-full ${c.dot} shrink-0"></span><span class="truncate">${c.text}</span>`;
+      onFirebaseBridgeReady() {
+        if (window.FirebaseBridge?.available && this.cloudUser) {
+          this.setSyncStatus('cloud', `متصل: ${this.cloudUser.email || 'حساب المعلم'}`);
         }
       },
 
       onCloudUserChanged(user) {
         this.cloudUser = user;
-        this.isDemoMode = !user;
         if (user) {
+          sessionStorage.removeItem('masahat_local_session');
+          this.explicitLocalSession = false;
           this.hideAuthGate();
-          this.setSyncStatus('syncing', `جارٍ جلب بيانات ${user.email || 'الحساب'}...`);
+          this.setSyncStatus('syncing', 'جارٍ المزامنة...');
         } else {
           this._cloudHydrated = false;
-          this.setSyncStatus('local', 'وضع محلي غير متصل');
+          this.setSyncStatus('local');
           if (!this.explicitLocalSession) {
             this.showAuthGate();
           }
@@ -1384,575 +1130,378 @@
       },
 
       handleNewCloudTeacher(uid) {
-        const savedOwner = localStorage.getItem('masahat_saffi_owner_uid');
-        if (savedOwner && savedOwner !== uid) {
-          this.state = DEFAULT_STATE();
-          localStorage.setItem('masahat_saffi_state_v1', JSON.stringify(this.state));
-        }
-        localStorage.setItem('masahat_saffi_owner_uid', uid);
+        this._cloudHydrated = true;
+        this.setSyncStatus('cloud', `متصل: ${this.cloudUser?.email || 'حساب جديد'}`);
         if (!this.state.onboarded) {
           this.showOnboarding();
-        } else {
-          this.saveState();
-        }
-      },
-
-      loadLocalState() {
-        try {
-          const raw = localStorage.getItem('masahat_saffi_state_v1');
-          if (raw) {
-            const parsed = JSON.parse(raw);
-            this.state = { ...DEFAULT_STATE(), ...parsed };
-          }
-        } catch (e) {
-          console.error('Failed to load local state:', e);
-        }
-      },
-
-      saveState(newLedgerEntries = null, syncLiveSession = true) {
-        if (syncLiveSession) {
-          this.state.liveSession = {
-            activeClassId: this.activeClassId,
-            activeSubjectId: this.activeSubjectId,
-            activePeriodId: this.activePeriodId,
-            trafficLight: this.trafficLight,
-            updatedByDevice: this.deviceSessionId,
-            updatedAt: Date.now()
-          };
-        }
-        try {
-          localStorage.setItem('masahat_saffi_state_v1', JSON.stringify(this.state));
-          if (this.cloudUser && window.FirebaseBridge?.available) {
-            localStorage.setItem('masahat_saffi_owner_uid', this.cloudUser.uid);
-            this.setSyncStatus('syncing', 'جارٍ المزامنة...');
-            const tasks = [window.FirebaseBridge.saveState(this.state)];
-            if (Array.isArray(newLedgerEntries) && newLedgerEntries.length > 0) {
-              tasks.push(window.FirebaseBridge.saveLedgerEntries(newLedgerEntries));
-            }
-            Promise.all(tasks)
-              .then(() => this.setSyncStatus('cloud'))
-              .catch((err) => {
-                console.error('Cloud save error:', err);
-                const errCode = err?.code ? ` (${err.code})` : '';
-                this.setSyncStatus('error', `تعذر الحفظ السحابي${errCode}`);
-                UI.toast(`تعذر حفظ البيانات في السحابة${errCode} — تأكد من اتصال الإنترنت وقواعد Firestore`, 'error');
-              });
-          } else {
-            this.setSyncStatus('local', 'محفوظ محليًا فقط');
-          }
-        } catch (e) {
-          UI.toast('تعذر حفظ البيانات محليًا بسبب امتلاء مساحة المتصفح', 'error');
         }
       },
 
       applyRemoteState(remoteData) {
-        if (!remoteData) return;
-        const currentLedger = this.state.heartLedger || [];
-        this.state = { ...DEFAULT_STATE(), ...this.state, ...remoteData, heartLedger: currentLedger };
-        if (this.cloudUser) {
-          localStorage.setItem('masahat_saffi_owner_uid', this.cloudUser.uid);
-        }
-        localStorage.setItem('masahat_saffi_state_v1', JSON.stringify(this.state));
-
-        if (this.state.onboarded) {
-          document.getElementById('onboarding-overlay')?.classList.add('hidden');
-          document.getElementById('onboarding-overlay')?.classList.remove('flex');
-        }
-
-        const isFromOtherDevice = remoteData.liveSession?.updatedByDevice && remoteData.liveSession.updatedByDevice !== this.deviceSessionId;
-        if (remoteData.liveSession) {
-          if (remoteData.liveSession.activeClassId && this.state.classes.some(c => c.id === remoteData.liveSession.activeClassId)) {
-            this.activeClassId = remoteData.liveSession.activeClassId;
-          }
-          if (remoteData.liveSession.activeSubjectId && this.state.subjects.some(s => s.id === remoteData.liveSession.activeSubjectId)) {
-            this.activeSubjectId = remoteData.liveSession.activeSubjectId;
-          }
-          if (remoteData.liveSession.trafficLight) {
-            this.trafficLight = remoteData.liveSession.trafficLight;
-          }
-        }
-
-        if (remoteData.timerState) {
-          this.timer.totalSec = remoteData.timerState.totalSec || 300;
-          if (remoteData.timerState.running && remoteData.timerState.endTimestamp) {
-            const rem = Math.max(0, Math.ceil((remoteData.timerState.endTimestamp - Date.now()) / 1000));
-            this.timer.remainingSec = rem;
-            if (rem > 0 && !this.timer.running) this.startTimer(true);
-          } else {
-            if (this.timer.running) {
-              clearInterval(this.timer.interval);
-              this.timer.running = false;
-            }
-            this.timer.remainingSec = remoteData.timerState.remainingSec ?? this.timer.totalSec;
-          }
-          this.updateTimerDisplay();
-        }
-
-        this.ensureActiveSelections();
-        this.applyPreferences();
-        this.updateHeaderSelectors();
-        this.setTrafficLight(this.trafficLight, true);
-        this.setSyncStatus('cloud');
-        this.renderCurrentView();
-
-        if (isFromOtherDevice) {
-          UI.toast('🔄 تم تحديث البيانات لحظيًا من جهازك الآخر', 'info');
-        }
-      },
-
-      applyRemoteLedger(entries, isPending = false) {
-        if (!Array.isArray(entries)) return;
-        let hasNewRemoteTx = false;
-        entries.forEach(tx => {
-          if (!this._knownLedgerIds.has(tx.id)) {
-            this._knownLedgerIds.add(tx.id);
-            if (!isPending) hasNewRemoteTx = true;
-          }
-        });
-        this.state.heartLedger = entries;
-        localStorage.setItem('masahat_saffi_state_v1', JSON.stringify(this.state));
-        if (!isPending) {
+        this._applyingRemote = true;
+        try {
+          const preservedLedger = this.state.heartLedger || [];
+          this.state = {
+            ...this.state,
+            ...remoteData,
+            settings: { ...this.state.settings, ...(remoteData.settings || {}) },
+            heartLedger: preservedLedger
+          };
+          this.saveLocalOnly();
+          this.ensureActiveSelections();
+          this.applyPreferences();
+          this.updateHeaderSelectors();
+          if (this.state.onboarded) this.hideOnboarding();
+          this.setSyncStatus('cloud', `متصل: ${this.cloudUser?.email || 'حساب المعلم'}`);
           this.renderCurrentView();
-          if (hasNewRemoteTx) {
-            SoundFX.play('heart');
-            UI.toast('❤️ تم تحديث نقاط القلوب لحظيًا من السحابة', 'success');
+        } finally {
+          this._applyingRemote = false;
+        }
+      },
+
+      applyRemoteLedger(entries, hasPendingWrites) {
+        const map = new Map();
+        (this.state.heartLedger || []).forEach(tx => map.set(tx.id, tx));
+        entries.forEach(tx => map.set(tx.id, tx));
+        this.state.heartLedger = Array.from(map.values()).sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+        this.saveLocalOnly();
+        if (!hasPendingWrites) {
+          this.setSyncStatus('cloud', `متصل: ${this.cloudUser?.email || 'حساب المعلم'}`);
+        }
+        this.renderCurrentView();
+      },
+
+      setSyncStatus(mode, customText) {
+        const topPill = document.getElementById('top-sync-pill');
+        const sideBadge = document.getElementById('sync-badge');
+
+        if (mode === 'cloud') {
+          const label = customText || `متصل: ${this.cloudUser?.email || 'متزامن سحابيًا'}`;
+          if (topPill) {
+            topPill.className = 'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-2xl text-xs font-extrabold bg-emerald-100 text-emerald-900 border border-emerald-300 transition max-w-[230px]';
+            topPill.innerHTML = `<span class="w-2 h-2 rounded-full bg-emerald-500 shrink-0"></span><span class="truncate">${UI.escapeHtml(label)}</span>`;
+          }
+          if (sideBadge) {
+            sideBadge.className = 'inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-400/20 text-emerald-300';
+            sideBadge.innerHTML = `<span class="w-2 h-2 rounded-full bg-emerald-400"></span>متزامن سحابيًا`;
+          }
+        } else if (mode === 'syncing') {
+          const label = customText || 'جارٍ المزامنة...';
+          if (topPill) {
+            topPill.className = 'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-2xl text-xs font-extrabold bg-sky-100 text-sky-900 border border-sky-300 transition max-w-[230px]';
+            topPill.innerHTML = `<span class="w-2 h-2 rounded-full bg-sky-500 animate-ping shrink-0"></span><span class="truncate">${UI.escapeHtml(label)}</span>`;
+          }
+        } else if (mode === 'error') {
+          const label = customText || 'تعذر الاتصال بالسحابة';
+          if (topPill) {
+            topPill.className = 'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-2xl text-xs font-extrabold bg-rose-100 text-rose-900 border border-rose-300 transition max-w-[230px]';
+            topPill.innerHTML = `<span class="w-2 h-2 rounded-full bg-rose-500 shrink-0"></span><span class="truncate">${UI.escapeHtml(label)}</span>`;
+          }
+        } else {
+          if (topPill) {
+            topPill.className = 'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-2xl text-xs font-extrabold bg-amber-100 text-amber-900 border border-amber-300 transition max-w-[230px]';
+            topPill.innerHTML = `<span class="w-2 h-2 rounded-full bg-amber-500 shrink-0"></span><span class="truncate">وضع محلي غير متصل</span>`;
+          }
+          if (sideBadge) {
+            sideBadge.className = 'inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-amber-400/20 text-amber-300';
+            sideBadge.innerHTML = `<span class="w-2 h-2 rounded-full bg-amber-400"></span>وضع التجربة المحلي`;
           }
         }
       },
 
-      showOnboarding() {
-        const ov = document.getElementById('onboarding-overlay');
-        ov.classList.remove('hidden');
-        ov.classList.add('flex');
+      formatAuthError(err) {
+        const code = err?.code || '';
+        if (code === 'auth/unauthorized-domain') {
+          return 'هذا النطاق غير مضاف في Authorized domains داخل مشروع Firebase.';
+        }
+        if (code === 'auth/popup-closed-by-user') {
+          return 'تم إغلاق نافذة تسجيل الدخول قبل الإكمال.';
+        }
+        if (code === 'auth/network-request-failed') {
+          return 'تعذر الاتصال بالإنترنت، تحقق من الشبكة.';
+        }
+        return err?.message || 'حدث خطأ أثناء تسجيل الدخول.';
+      },
+
+      loadLocalState() {
+        try {
+          const raw = localStorage.getItem(this.STORAGE_KEY);
+          if (raw) {
+            const parsed = JSON.parse(raw);
+            this.state = {
+              ...this.state,
+              ...parsed,
+              settings: { ...this.state.settings, ...(parsed.settings || {}) },
+              schedule: { ...this.state.schedule, ...(parsed.schedule || {}) }
+            };
+          }
+        } catch (e) {
+          console.warn("Local state read failed:", e);
+        }
+      },
+
+      saveLocalOnly() {
+        try {
+          localStorage.setItem(this.STORAGE_KEY, JSON.stringify(this.state));
+        } catch (e) {
+          console.warn("Local storage quota warning:", e);
+        }
+      },
+
+      saveState(newLedgerEntries = null) {
+        this.saveLocalOnly();
+        if (this._applyingRemote) return;
+        if (window.FirebaseBridge?.available && this.cloudUser) {
+          this.setSyncStatus('syncing', 'جارٍ المزامنة...');
+          Promise.all([
+            window.FirebaseBridge.saveState(this.state),
+            newLedgerEntries ? window.FirebaseBridge.saveLedgerEntries(newLedgerEntries) : Promise.resolve(true)
+          ])
+            .then(() => this.setSyncStatus('cloud', `متصل: ${this.cloudUser?.email || 'حساب المعلم'}`))
+            .catch(() => this.setSyncStatus('error', 'فشل حفظ التعديلات سحابيًا'));
+        }
       },
 
       completeOnboarding() {
-        const tName = document.getElementById('ob-teacher-name').value.trim();
-        if (!tName) {
-          UI.toast('يرجى إدخال اسم المعلم للمتابعة', 'warning');
-          return;
+        const teacherName = document.getElementById('ob-teacher-name').value.trim();
+        if (!teacherName) return UI.toast('يرجى إدخال اسم المعلم للمتابعة', 'warning');
+
+        this.state.settings.teacherName = teacherName;
+        this.state.settings.schoolName = document.getElementById('ob-school-name').value.trim();
+        this.state.settings.platformName = document.getElementById('ob-platform-name').value.trim() || 'مساحة صفّي';
+        this.state.settings.timezone = document.getElementById('ob-timezone').value || 'Asia/Kuwait';
+
+        const subName = document.getElementById('ob-subject').value.trim();
+        const clsName = document.getElementById('ob-class-name').value.trim();
+        const stuLines = document.getElementById('ob-students').value.split('\n').map(s => s.trim()).filter(Boolean);
+
+        let subId = '';
+        if (subName) {
+          subId = UI.uid('sub');
+          this.state.subjects.push({ id: subId, name: subName, color: '#7c3aed' });
+          this.activeSubjectId = subId;
         }
-        const sName = document.getElementById('ob-school-name').value.trim();
-        const pName = document.getElementById('ob-platform-name').value.trim() || 'مساحة صفّي';
-        const tz = document.getElementById('ob-timezone').value;
-        const subjName = document.getElementById('ob-subject').value.trim() || 'المادة الأساسية';
-        const className = document.getElementById('ob-class-name').value.trim() || 'الفصل الأول';
-        const rawStudents = document.getElementById('ob-students').value.trim();
 
-        const subjId = UI.uid('sub');
-        const classId = UI.uid('cls');
-
-        this.state.settings.teacherName = tName;
-        this.state.settings.schoolName = sName;
-        this.state.settings.platformName = pName;
-        this.state.settings.timezone = tz;
-        this.state.settings.isDemoData = false;
-        this.state.onboarded = true;
-
-        this.state.subjects = [{ id: subjId, name: subjName, color: '#7c3aed' }];
-        this.state.classes = [{ id: classId, name: className, subjectIds: [subjId], archived: false }];
-
-        if (rawStudents) {
-          const lines = rawStudents.split('\n').map(s => s.trim()).filter(Boolean);
-          lines.forEach(name => {
+        if (clsName) {
+          const clsId = UI.uid('cls');
+          this.state.classes.push({ id: clsId, name: clsName, subjectIds: subId ? [subId] : [], archived: false });
+          this.activeClassId = clsId;
+          stuLines.forEach(name => {
             this.state.students.push({
               id: UI.uid('stu'),
               qrToken: UI.qrToken(),
               name,
-              classId
+              classId: clsId
             });
           });
         }
 
-        this.activeClassId = classId;
-        this.activeSubjectId = subjId;
-        this.saveState();
-
-        document.getElementById('onboarding-overlay').classList.add('hidden');
-        document.getElementById('onboarding-overlay').classList.remove('flex');
+        this.state.onboarded = true;
+        this._cloudHydrated = true;
+        this.hideOnboarding();
+        this.ensureActiveSelections();
         this.applyPreferences();
         this.updateHeaderSelectors();
+        this.saveState();
         this.renderCurrentView();
-        UI.toast('تم حفظ إعداداتك بنجاح! يمكنك إكمال الفصول والكتب من قسم التجهيز.', 'success');
+        UI.toast('تم حفظ إعداداتك بنجاح! مرحبًا بك في مساحة صفّي', 'success');
       },
 
-      loadDemoData(fromOnboarding = false) {
-        const sub1 = UI.uid('sub');
-        const sub2 = UI.uid('sub');
-        const cls1 = UI.uid('cls');
-        const cls2 = UI.uid('cls');
+      loadDemoData(fromOnboarding) {
+        const sub1 = { id: 'sub_phys', name: 'الفيزياء', color: '#7c3aed' };
+        const sub2 = { id: 'sub_chem', name: 'الكيمياء', color: '#0284c7' };
+        const cls1 = { id: 'cls_10a', name: 'عاشر - أ', subjectIds: ['sub_phys', 'sub_chem'], archived: false };
+        const cls2 = { id: 'cls_11b', name: 'حادي عشر - ب', subjectIds: ['sub_phys'], archived: false };
 
-        const s1Names = [
-          'أحمد محمد السالم', 'سارة عبدالله القحطاني', 'نورة فهد الدوسري', 'خالد عبدالعزيز العتيبي',
-          'ريم سعد المطيري', 'عمر طارق الشمري', 'لمى ناصر الغامدي', 'يوسف إبراهيم الزهراني',
-          'دانة وليد الحربي', 'فيصل بندر العنزي', 'جود ماجد السبيعي', 'راكان سلطان الشهري'
+        const demoNames1 = [
+          'أحمد محمد السالم', 'سارة عبدالله القحطاني', 'نورة فهد الدوسري',
+          'خالد ناصر المطيري', 'ريم سعد العتيبي', 'يوسف علي العنزي',
+          'دانة حمد الرشيدي', 'عبدالعزيز طارق الشمري'
         ];
-        const s2Names = [
-          'شهد عادل الرشيدي', 'تركي منصور البقمي', 'غادة حمد الكندري', 'مشعل جاسم الفضلي',
-          'هيا بدر الخالدي', 'زياد سامي الصالح'
+        const demoNames2 = [
+          'فاطمة بدر الكندري', 'مريم عادل الفضلي', 'عمر وليد الحربي', 'لولوة جاسم الصباح'
         ];
 
-        const students = [];
-        s1Names.forEach(name => students.push({ id: UI.uid('stu'), qrToken: UI.qrToken(), name, classId: cls1 }));
-        s2Names.forEach(name => students.push({ id: UI.uid('stu'), qrToken: UI.qrToken(), name, classId: cls2 }));
+        const students = [
+          ...demoNames1.map((name, i) => ({ id: `stu_a_${i + 1}`, qrToken: `MSQ-DEMO-A0${i + 1}`, name, classId: 'cls_10a' })),
+          ...demoNames2.map((name, i) => ({ id: `stu_b_${i + 1}`, qrToken: `MSQ-DEMO-B0${i + 1}`, name, classId: 'cls_11b' }))
+        ];
 
         const questions = [
           {
-            id: UI.uid('q'),
+            id: 'q_demo_1',
             type: 'mcq',
-            text: 'ما هي وحدة قياس القوة في النظام الدولي للوحدات (SI)؟',
+            text: 'ما وحدة قياس القوة في النظام الدولي للوحدات (SI)؟',
             options: ['النيوتن (N)', 'الجول (J)', 'الواط (W)', 'الباسكال (Pa)'],
             correctIndex: 0,
-            subjectId: sub1,
-            unit: 'الميكانيكا وقوانين نيوتن',
+            subjectId: 'sub_phys',
+            unit: 'القوة والحركة',
             difficulty: 'سهل',
-            explanation: 'تُقاس القوة بوحدة النيوتن (N) تكريمًا للعالم إسحاق نيوتن، وتكافئ كجم.م/ث².',
-            points: 5,
-            timeLimit: 30
+            explanation: 'تُقاس القوة بوحدة النيوتن نسبةً إلى العالم إسحاق نيوتن.',
+            points: 5
           },
           {
-            id: UI.uid('q'),
+            id: 'q_demo_2',
             type: 'tf',
-            text: 'تزداد طاقة الوضع الجاذبية للجسم كلما زاد ارتفاعه عن سطح الأرض.',
+            text: 'تزداد الطاقة الحركية للجسم بزيادة سرعته.',
             options: ['صح', 'خطأ'],
             correctIndex: 0,
-            subjectId: sub1,
-            unit: 'الشغل والطاقة',
+            subjectId: 'sub_phys',
+            unit: 'الطاقة والشغل',
             difficulty: 'سهل',
-            explanation: 'صحيح؛ لأن طاقة الوضع PE = mgh تتناسب طرديًا مع الارتفاع h.',
-            points: 5,
-            timeLimit: 20
+            explanation: 'الطاقة الحركية تتناسب طرديًا مع مربع السرعة.',
+            points: 5
           },
           {
-            id: UI.uid('q'),
+            id: 'q_demo_3',
             type: 'mcq',
-            text: 'إذا تضاعفت سرعة جسم متحرك مرتين مع ثبات كتلته، فإن طاقته الحركية:',
-            options: ['تتضاعف مرتين', 'تتضاعف أربع مرات', 'تبقى ثابتة', 'تقل إلى النصف'],
-            correctIndex: 1,
-            subjectId: sub1,
-            unit: 'الشغل والطاقة',
+            text: 'أي مما يلي يُعد مثالاً على التسارع الثابت؟',
+            options: ['السقوط الحر قرب سطح الأرض', 'سيارة تتوقف عند إشارة المرور', 'حركة بندول متذبذب', 'قطار يغير سرعته عشوائيًا'],
+            correctIndex: 0,
+            subjectId: 'sub_phys',
+            unit: 'الحركة بتسارع ثابت',
             difficulty: 'متوسط',
-            explanation: 'الطاقة الحركية KE = ½mv² تتناسب طرديًا مع مربع السرعة، لذا (2)² = 4 أضعاف.',
-            points: 10,
-            timeLimit: 40
-          },
-          {
-            id: UI.uid('q'),
-            type: 'mcq',
-            text: 'أي من الجسيمات التالية يحمل شحنة كهربائية موجبة داخل نواة الذرة؟',
-            options: ['الإلكترون', 'النيوترون', 'البروتون', 'الفوتون'],
-            correctIndex: 2,
-            subjectId: sub2,
-            unit: 'التركيب الذري',
-            difficulty: 'سهل',
-            explanation: 'البروتونات جسيمات موجبة الشحنة توجد داخل النواة.',
-            points: 5,
-            timeLimit: 25
+            explanation: 'تسارع الجاذبية الأرضية ثابت تقريبًا ويساوي 9.8 m/s².',
+            points: 10
           }
         ];
 
-        const ledger = [];
-        const reasons = ['إجابة صحيحة', 'مشاركة متميزة', 'تعاون مع المجموعة', 'حل مسألة تحدي'];
-        students.slice(0, 8).forEach((st, idx) => {
-          const txId = UI.uid('tx');
-          this._knownLedgerIds.add(txId);
-          ledger.push({
-            id: txId,
-            studentId: st.id,
-            classId: st.classId,
-            points: (idx % 3 + 1) * 5,
-            reason: reasons[idx % reasons.length],
-            source: 'يدوي',
-            timestamp: Date.now() - idx * 3600000,
-            undone: false
-          });
-        });
-
-        this.state = {
-          ...DEFAULT_STATE(),
-          onboarded: true,
-          settings: {
-            platformName: 'مساحة صفّي',
-            teacherName: 'أ. عبدالعزيز المنصور',
-            schoolName: 'ثانوية التميز النموذجية',
-            timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || 'Asia/Kuwait',
-            soundEnabled: true,
-            reduceMotion: false,
-            isDemoData: true
-          },
-          subjects: [
-            { id: sub1, name: 'الفيزياء', color: '#7c3aed' },
-            { id: sub2, name: 'الكيمياء', color: '#0284c7' }
-          ],
-          classes: [
-            { id: cls1, name: 'ثاني ثانوي - 1', subjectIds: [sub1, sub2], archived: false },
-            { id: cls2, name: 'ثالث ثانوي - متقدم', subjectIds: [sub1], archived: false }
-          ],
-          students,
-          questions,
-          heartLedger: ledger,
-          schedule: {
-            ...DEFAULT_STATE().schedule,
-            slots: {
-              'الأحد_p1': { classId: cls1, subjectId: sub1 },
-              'الأحد_p2': { classId: cls2, subjectId: sub1 },
-              'الاثنين_p1': { classId: cls1, subjectId: sub2 },
-              'الثلاثاء_p3': { classId: cls1, subjectId: sub1 }
-            }
-          }
+        this.state.onboarded = true;
+        this.state.settings.teacherName = this.state.settings.teacherName || 'أ. معلم المرحلة الثانوية';
+        this.state.settings.schoolName = this.state.settings.schoolName || 'ثانوية التميز';
+        this.state.subjects = [sub1, sub2];
+        this.state.classes = [cls1, cls2];
+        this.state.students = students;
+        this.state.questions = questions;
+        this.state.groupsByClass = {
+          cls_10a: [
+            { name: 'مجموعة الرواد', studentIds: ['stu_a_1', 'stu_a_2', 'stu_a_3', 'stu_a_4'] },
+            { name: 'مجموعة الإبداع', studentIds: ['stu_a_5', 'stu_a_6', 'stu_a_7', 'stu_a_8'] }
+          ]
         };
 
-        this.activeClassId = cls1;
-        this.activeSubjectId = sub1;
-        this.saveState(ledger);
-
-        if (fromOnboarding) {
-          document.getElementById('onboarding-overlay').classList.add('hidden');
-          document.getElementById('onboarding-overlay').classList.remove('flex');
-        }
+        this.activeClassId = 'cls_10a';
+        this.activeSubjectId = 'sub_phys';
+        this._cloudHydrated = true;
+        if (fromOnboarding) this.hideOnboarding();
         this.applyPreferences();
         this.updateHeaderSelectors();
+        this.saveState();
         this.renderCurrentView();
-        UI.toast('تم تحميل بيانات تجريبية موسومة بوضوح للتجربة والاستكشاف', 'info');
+        UI.toast('تم تحميل البيانات التجريبية الجاهزة للاستكشاف!', 'success');
       },
 
       ensureActiveSelections() {
         const activeClasses = this.state.classes.filter(c => !c.archived);
-        if (!this.activeClassId || !activeClasses.some(c => c.id === this.activeClassId)) {
-          this.activeClassId = activeClasses[0]?.id || null;
+        if (!activeClasses.some(c => c.id === this.activeClassId)) {
+          this.activeClassId = activeClasses[0]?.id || '';
         }
-        if (!this.activeSubjectId || !this.state.subjects.some(s => s.id === this.activeSubjectId)) {
-          const cls = activeClasses.find(c => c.id === this.activeClassId);
-          this.activeSubjectId = cls?.subjectIds?.[0] || this.state.subjects[0]?.id || null;
+        if (!this.state.subjects.some(s => s.id === this.activeSubjectId)) {
+          this.activeSubjectId = this.state.subjects[0]?.id || '';
         }
       },
 
       applyPreferences() {
         document.getElementById('ui-platform-title').textContent = this.state.settings.platformName || 'مساحة صفّي';
-        const demoTag = this.state.settings.isDemoData ? ' (بيانات تجريبية)' : '';
-        document.getElementById('ui-teacher-subtitle').textContent = (this.state.settings.teacherName || 'إدارة صفية ذكية') + demoTag;
+        document.getElementById('ui-teacher-subtitle').textContent = this.state.settings.teacherName || 'إدارة صفية ذكية';
+        document.body.classList.toggle('reduce-motion', !!this.state.settings.reduceMotion);
+        this.setTrafficLight(this.state.settings.trafficLight || 'green', false);
+        this.updateNavStyles();
+      },
 
-        if (this.state.settings.reduceMotion) {
-          document.body.classList.add('reduce-motion');
-        } else {
-          document.body.classList.remove('reduce-motion');
-        }
+      updateNavStyles() {
+        document.querySelectorAll('.nav-btn').forEach(btn => {
+          const isCurrent = btn.getAttribute('data-nav') === this.mainTab;
+          btn.className = `nav-btn w-full flex items-center gap-3.5 px-4 py-3.5 rounded-2xl font-extrabold text-base transition text-right ${
+            isCurrent ? 'bg-amber-400 text-brand-950 shadow-lg' : 'text-white/90 hover:bg-white/10'
+          }`;
+        });
+      },
 
-        const sndBtn = document.getElementById('btn-sound-toggle');
-        if (sndBtn) {
-          sndBtn.innerHTML = this.state.settings.soundEnabled
-            ? `<i data-lucide="volume-2" class="w-4 h-4 text-emerald-300"></i><span>الصوت</span>`
-            : `<i data-lucide="volume-x" class="w-4 h-4 text-rose-300"></i><span>مكتوم</span>`;
-        }
-        const motBtn = document.getElementById('btn-motion-toggle');
-        if (motBtn) {
-          motBtn.innerHTML = this.state.settings.reduceMotion
-            ? `<i data-lucide="pause-circle" class="w-4 h-4 text-amber-300"></i><span>هادئ</span>`
-            : `<i data-lucide="sparkles" class="w-4 h-4 text-emerald-300"></i><span>الحركة</span>`;
-        }
-        lucide.createIcons();
+      setMainTab(tab) {
+        if (tab !== 'lesson') PointsQRModule.stopScanner();
+        this.mainTab = tab;
+        this.updateNavStyles();
+        this.renderCurrentView();
       },
 
       updateHeaderSelectors() {
-        const clsSelect = document.getElementById('active-class-select');
-        const subSelect = document.getElementById('active-subject-select');
+        const clsSel = document.getElementById('active-class-select');
+        const subSel = document.getElementById('active-subject-select');
         const activeClasses = this.state.classes.filter(c => !c.archived);
 
-        clsSelect.innerHTML = activeClasses.length
-          ? activeClasses.map(c => `<option value="${c.id}" ${c.id === this.activeClassId ? 'selected' : ''}>${UI.escapeHtml(c.name)}</option>`).join('')
-          : `<option value="">لا توجد فصول نشطة</option>`;
-
-        subSelect.innerHTML = this.state.subjects.length
-          ? this.state.subjects.map(s => `<option value="${s.id}" ${s.id === this.activeSubjectId ? 'selected' : ''}>${UI.escapeHtml(s.name)}</option>`).join('')
-          : `<option value="">لا توجد مواد</option>`;
+        if (clsSel) {
+          clsSel.innerHTML = activeClasses.length
+            ? activeClasses.map(c => `<option value="${c.id}" ${c.id === this.activeClassId ? 'selected' : ''}>${UI.escapeHtml(c.name)}</option>`).join('')
+            : `<option value="">لا توجد فصول</option>`;
+        }
+        if (subSel) {
+          subSel.innerHTML = this.state.subjects.length
+            ? this.state.subjects.map(s => `<option value="${s.id}" ${s.id === this.activeSubjectId ? 'selected' : ''}>${UI.escapeHtml(s.name)}</option>`).join('')
+            : `<option value="">بدون مادة</option>`;
+        }
+        const periodLbl = document.getElementById('ui-period-label');
+        if (periodLbl) periodLbl.textContent = this.activePeriodName || 'تلقائي';
       },
 
       selectActiveClass(classId) {
         this.activeClassId = classId;
-        const cls = this.state.classes.find(c => c.id === classId);
-        if (cls && cls.subjectIds?.length && !cls.subjectIds.includes(this.activeSubjectId)) {
-          this.activeSubjectId = cls.subjectIds[0];
-          this.updateHeaderSelectors();
-        }
+        this.lessonStartTime = Date.now();
         this.viewerState.pdfDoc = null;
-        this.viewerState.bookId = null;
-        this.saveState();
-        this.renderCurrentView();
-      },
-
-      selectActiveSubject(subId) {
-        this.activeSubjectId = subId;
-        this.viewerState.pdfDoc = null;
-        this.viewerState.bookId = null;
-        this.saveState();
-        this.renderCurrentView();
-      },
-
-      setMainTab(tab) {
-        this.mainTab = tab;
-        document.querySelectorAll('.nav-btn').forEach(btn => {
-          if (btn.dataset.nav === tab) {
-            btn.classList.add('bg-amber-400', 'text-brand-950', 'shadow-lg');
-            btn.classList.remove('text-white', 'hover:bg-white/10');
-          } else {
-            btn.classList.remove('bg-amber-400', 'text-brand-950', 'shadow-lg');
-            btn.classList.add('text-white', 'hover:bg-white/10');
-          }
-        });
-        if (window.innerWidth < 1024) {
-          document.getElementById('sidebar-nav').classList.add('hidden');
-          document.getElementById('sidebar-nav').classList.remove('flex');
-          document.getElementById('sidebar-footer').classList.add('hidden');
+        const book = this.state.books.find(b => b.id === this.viewerState.bookId);
+        if (book) {
+          this.viewerState.pageNum = book.lastPageByClass?.[classId] || 1;
         }
+        this.updateHeaderSelectors();
         this.renderCurrentView();
       },
 
-      setTrafficLight(color, silent = false) {
-        this.trafficLight = color;
-        const map = {
-          green: { el: 'tl-green', active: 'bg-emerald-500 light-glow-green scale-110', dim: 'bg-emerald-500/25' },
-          yellow: { el: 'tl-yellow', active: 'bg-amber-400 light-glow-yellow scale-110', dim: 'bg-amber-400/25' },
-          red: { el: 'tl-red', active: 'bg-rose-500 light-glow-red scale-110', dim: 'bg-rose-500/25' }
-        };
-        Object.keys(map).forEach(k => {
-          const btn = document.getElementById(map[k].el);
-          if (!btn) return;
-          btn.className = `w-6 h-6 rounded-full border border-white/40 transition-all ${k === color ? map[k].active : map[k].dim}`;
-        });
-        if (!silent) {
+      selectActiveSubject(subjectId) {
+        this.activeSubjectId = subjectId;
+        this.viewerState.pdfDoc = null;
+        this.updateHeaderSelectors();
+        this.renderCurrentView();
+      },
+
+      setTrafficLight(color, shouldSave = true) {
+        this.state.settings.trafficLight = color;
+        const g = document.getElementById('tl-green');
+        const y = document.getElementById('tl-yellow');
+        const r = document.getElementById('tl-red');
+        if (g && y && r) {
+          g.className = `w-6 h-6 rounded-full transition ${color === 'green' ? 'bg-emerald-500 scale-110 light-glow-green border-2 border-white' : 'bg-emerald-500/25 border border-emerald-400/50'}`;
+          y.className = `w-6 h-6 rounded-full transition ${color === 'yellow' ? 'bg-amber-400 scale-110 light-glow-yellow border-2 border-white' : 'bg-amber-400/25 border border-amber-300/50'}`;
+          r.className = `w-6 h-6 rounded-full transition ${color === 'red' ? 'bg-rose-500 scale-110 light-glow-red border-2 border-white' : 'bg-rose-500/25 border border-rose-400/50'}`;
+        }
+        if (shouldSave) {
           SoundFX.play('tick');
           this.saveState();
-          const msgs = {
-            green: '🟢 إشارة خضراء: تفاعل ونقاش صفي',
-            yellow: '🟡 إشارة صفراء: هدوء نسبي وعمل مجموعات',
-            red: '🔴 إشارة حمراء: انتباه وهدوء تام للشرح'
-          };
-          UI.toast(msgs[color], 'info');
         }
       },
 
       toggleSound() {
         this.state.settings.soundEnabled = !this.state.settings.soundEnabled;
         this.saveState();
-        this.applyPreferences();
         UI.toast(this.state.settings.soundEnabled ? 'تم تفعيل المؤثرات الصوتية' : 'تم كتم الصوت', 'info');
       },
 
       toggleMotion() {
         this.state.settings.reduceMotion = !this.state.settings.reduceMotion;
-        this.saveState();
         this.applyPreferences();
-        UI.toast(this.state.settings.reduceMotion ? 'تم تفعيل وضع تقليل الحركة' : 'تم تفعيل الحركة الطبيعية', 'info');
+        this.saveState();
+        UI.toast(this.state.settings.reduceMotion ? 'تم تفعيل وضع تقليل الحركة' : 'تم تفعيل الحركة الكاملة', 'info');
       },
 
       toggleFullScreen() {
-        const sidebar = document.getElementById('main-sidebar');
-        const exitBtn = document.getElementById('exit-fs-btn');
-        const isHidden = sidebar.classList.contains('hidden');
-        if (!isHidden) {
-          sidebar.classList.add('hidden');
-          exitBtn.classList.remove('hidden');
-          if (document.documentElement.requestFullscreen) {
-            document.documentElement.requestFullscreen().catch(() => {});
-          }
+        if (!document.fullscreenElement) {
+          document.documentElement.requestFullscreen?.().catch(() => {});
+          document.getElementById('main-sidebar')?.classList.add('hidden');
+          document.getElementById('exit-fs-btn')?.classList.remove('hidden');
         } else {
-          sidebar.classList.remove('hidden');
-          exitBtn.classList.add('hidden');
-          if (document.fullscreenElement && document.exitFullscreen) {
-            document.exitFullscreen().catch(() => {});
-          }
+          document.exitFullscreen?.().catch(() => {});
+          document.getElementById('main-sidebar')?.classList.remove('hidden');
+          document.getElementById('exit-fs-btn')?.classList.add('hidden');
         }
-      },
-
-      startClockAndScheduleWatcher() {
-        const updateClock = () => {
-          try {
-            const tz = this.state.settings.timezone || 'Asia/Kuwait';
-            const now = new Date();
-            const fmt = new Intl.DateTimeFormat('ar-SA', {
-              timeZone: tz,
-              weekday: 'long',
-              year: 'numeric',
-              month: 'short',
-              day: 'numeric',
-              hour: '2-digit',
-              minute: '2-digit'
-            });
-            const el = document.getElementById('ui-date-clock');
-            if (el) el.textContent = fmt.format(now);
-          } catch (e) {}
-        };
-        updateClock();
-        this.autoDetectSchedule(false);
-        setInterval(() => {
-          updateClock();
-          this.autoDetectSchedule(false);
-        }, 30000);
-      },
-
-      getCurrentTimeInTimezone() {
-        const tz = this.state.settings.timezone || 'Asia/Kuwait';
-        const now = new Date();
-        const dayName = new Intl.DateTimeFormat('ar-SA', { timeZone: tz, weekday: 'long' }).format(now);
-        const parts = new Intl.DateTimeFormat('en-GB', {
-          timeZone: tz,
-          hour: '2-digit',
-          minute: '2-digit',
-          hour12: false
-        }).format(now);
-        return { dayName, timeStr: parts };
-      },
-
-      autoDetectSchedule(manualTrigger = false) {
-        const { dayName, timeStr } = this.getCurrentTimeInTimezone();
-        const matchedDay = this.state.schedule.days.find(d => dayName.includes(d) || d.includes(dayName));
-        if (!matchedDay) {
-          document.getElementById('ui-period-label').textContent = 'خارج أيام الدراسة';
-          if (manualTrigger) UI.toast('اليوم خارج أيام الدراسة المحددة في الجدول؛ يمكنك اختيار الفصل يدويًا.', 'info');
-          return;
-        }
-
-        const currentPeriod = this.state.schedule.periods.find(p => timeStr >= p.start && timeStr <= p.end);
-        if (!currentPeriod) {
-          document.getElementById('ui-period-label').textContent = 'وقت استراحة / خارج الحصص';
-          if (manualTrigger) UI.toast('لا توجد حصة مجدولة في هذا التوقيت؛ يمكنك الاختيار يدويًا.', 'info');
-          return;
-        }
-
-        const slotKey = `${matchedDay}_${currentPeriod.id}`;
-        const slot = this.state.schedule.slots[slotKey];
-        document.getElementById('ui-period-label').textContent = `${currentPeriod.name} (${currentPeriod.start})`;
-
-        if (slot && slot.classId) {
-          if (manualTrigger || !this.activePeriodId) {
-            this.activePeriodId = currentPeriod.id;
-            this.activeClassId = slot.classId;
-            if (slot.subjectId) this.activeSubjectId = slot.subjectId;
-            this.updateHeaderSelectors();
-            this.renderCurrentView();
-            if (manualTrigger) UI.toast(`تم ضبط الحصة: ${currentPeriod.name}`, 'success');
-          } else if (this.activePeriodId !== currentPeriod.id && slot.classId !== this.activeClassId) {
-            const cls = this.state.classes.find(c => c.id === slot.classId);
-            const sub = this.state.subjects.find(s => s.id === slot.subjectId);
-            this._pendingScheduledSlot = { periodId: currentPeriod.id, classId: slot.classId, subjectId: slot.subjectId };
-            document.getElementById('next-period-text').textContent =
-              `بدأت ${currentPeriod.name}: ${cls?.name || ''} (${sub?.name || ''}) — هل ترغب بالانتقال إليها؟`;
-            document.getElementById('next-period-banner').classList.remove('hidden');
-          }
-        } else if (manualTrigger) {
-          UI.toast(`الحصة الحالية (${currentPeriod.name}) غير مرتبطة بفصل في الجدول بعد.`, 'warning');
-        }
-      },
-
-      switchToScheduledPeriod() {
-        if (!this._pendingScheduledSlot) return;
-        this.activePeriodId = this._pendingScheduledSlot.periodId;
-        this.activeClassId = this._pendingScheduledSlot.classId;
-        if (this._pendingScheduledSlot.subjectId) this.activeSubjectId = this._pendingScheduledSlot.subjectId;
-        document.getElementById('next-period-banner').classList.add('hidden');
-        this.updateHeaderSelectors();
-        this.renderCurrentView();
-        UI.toast('تم الانتقال إلى الحصة الجديدة بنجاح', 'success');
       },
 
       openTimerTool() {
@@ -1961,142 +1510,176 @@
         this.renderCurrentView();
       },
 
-      setTimerDuration(seconds) {
-        clearInterval(this.timer.interval);
-        this.timer.running = false;
-        this.timer.totalSec = seconds;
-        this.timer.remainingSec = seconds;
-        this.state.timerState = { totalSec: seconds, remainingSec: seconds, running: false, endTimestamp: null };
-        this.saveState();
-        this.updateTimerDisplay();
-        if (this.mainTab === 'lesson' && this.lessonSideTab === 'timer') this.renderCurrentView();
-      },
-
-      startTimer(fromRemote = false) {
+      startTimer() {
         if (this.timer.running) return;
-        if (this.timer.remainingSec <= 0) this.timer.remainingSec = this.timer.totalSec;
         this.timer.running = true;
-        if (!fromRemote) {
-          this.state.timerState = {
-            totalSec: this.timer.totalSec,
-            remainingSec: this.timer.remainingSec,
-            running: true,
-            endTimestamp: Date.now() + this.timer.remainingSec * 1000
-          };
-          this.saveState();
-        }
-        this.timer.interval = setInterval(() => {
+        this.timer.intervalId = setInterval(() => {
           if (this.timer.remainingSec > 0) {
             this.timer.remainingSec--;
-            if (this.timer.remainingSec <= 5 && this.timer.remainingSec > 0) SoundFX.play('tick');
-            this.updateTimerDisplay();
+            this.updateTimerDisplays();
           } else {
-            clearInterval(this.timer.interval);
-            this.timer.running = false;
-            this.state.timerState = { totalSec: this.timer.totalSec, remainingSec: 0, running: false, endTimestamp: null };
-            this.updateTimerDisplay();
+            this.pauseTimer();
             SoundFX.play('alarm');
-            UI.toast('⏰ انتهى وقت المؤقت المحدد!', 'warning');
-            if (this.mainTab === 'lesson' && this.lessonSideTab === 'timer') this.renderCurrentView();
+            UI.toast('⏰ انتهى وقت النشاط المحدد!', 'warning');
           }
         }, 1000);
-        this.updateTimerDisplay();
       },
 
       pauseTimer() {
-        clearInterval(this.timer.interval);
         this.timer.running = false;
-        this.state.timerState = {
-          totalSec: this.timer.totalSec,
-          remainingSec: this.timer.remainingSec,
-          running: false,
-          endTimestamp: null
-        };
-        this.saveState();
-        this.updateTimerDisplay();
+        if (this.timer.intervalId) clearInterval(this.timer.intervalId);
       },
 
       resetTimer() {
-        this.setTimerDuration(this.timer.totalSec);
+        this.pauseTimer();
+        this.timer.remainingSec = this.timer.totalSec;
+        this.updateTimerDisplays();
       },
 
-      updateTimerDisplay() {
+      setTimerDuration(sec) {
+        this.pauseTimer();
+        this.timer.totalSec = sec;
+        this.timer.remainingSec = sec;
+        this.updateTimerDisplays();
+      },
+
+      updateTimerDisplays() {
         const m = String(Math.floor(this.timer.remainingSec / 60)).padStart(2, '0');
         const s = String(this.timer.remainingSec % 60).padStart(2, '0');
         const str = `${m}:${s}`;
         const mini = document.getElementById('mini-timer-display');
-        if (mini) mini.textContent = str;
-        const miniBox = document.getElementById('mini-timer-widget');
-        if (miniBox) {
-          if (this.timer.running && this.timer.remainingSec <= 10) {
-            miniBox.classList.add('bg-rose-600', 'animate-pulse');
-            miniBox.classList.remove('bg-brand-900');
-          } else {
-            miniBox.classList.remove('bg-rose-600', 'animate-pulse');
-            miniBox.classList.add('bg-brand-900');
-          }
-        }
         const big = document.getElementById('big-timer-display');
+        if (mini) mini.textContent = str;
         if (big) big.textContent = str;
       },
 
-      getStudentHearts(studentId, periodFilter = 'all') {
-        const now = Date.now();
-        const dayMs = 86400000;
-        return this.state.heartLedger
-          .filter(tx => !tx.undone && tx.studentId === studentId)
-          .filter(tx => {
-            if (periodFilter === 'lesson') return (now - tx.timestamp) <= 4 * 3600000;
-            if (periodFilter === 'week') return (now - tx.timestamp) <= 7 * dayMs;
-            if (periodFilter === 'month') return (now - tx.timestamp) <= 30 * dayMs;
-            return true;
-          })
-          .reduce((sum, tx) => sum + Number(tx.points || 0), 0);
+      startClockLoop() {
+        const update = () => {
+          const now = new Date();
+          const el = document.getElementById('ui-date-clock');
+          if (el) {
+            try {
+              el.textContent = now.toLocaleString('ar-SA', {
+                timeZone: this.state.settings.timezone || 'Asia/Kuwait',
+                weekday: 'long', hour: '2-digit', minute: '2-digit'
+              });
+            } catch {
+              el.textContent = now.toLocaleTimeString('ar-SA');
+            }
+          }
+        };
+        update();
+        setInterval(update, 15000);
+        setInterval(() => this.autoDetectSchedule(false), 30000);
       },
 
-      awardHearts({ studentIds, points, reason, source = 'يدوي', txGroupKey = null }) {
-        if (!studentIds || !studentIds.length) {
-          UI.toast('يرجى تحديد طالب أو مجموعة أولاً', 'warning');
-          return false;
-        }
+      autoDetectSchedule(manualTrigger) {
+        try {
+          const tz = this.state.settings.timezone || 'Asia/Kuwait';
+          const now = new Date();
+          const dayName = now.toLocaleDateString('ar-SA', { timeZone: tz, weekday: 'long' });
+          const timeParts = new Intl.DateTimeFormat('en-GB', {
+            timeZone: tz, hour: '2-digit', minute: '2-digit', hour12: false
+          }).format(now);
+
+          const matchedPeriod = this.state.schedule.periods.find(p => timeParts >= p.start && timeParts <= p.end);
+          if (!matchedPeriod) {
+            this.activePeriodName = 'وقت استراحة / خارج الحصص';
+            this.updateHeaderSelectors();
+            if (manualTrigger) UI.toast('لا توجد حصة مجدولة في الوقت الحالي — يمكنك الاختيار يدويًا', 'info');
+            return;
+          }
+
+          const slotKey = `${dayName}_${matchedPeriod.id}`;
+          const slot = this.state.schedule.slots[slotKey];
+          if (slot && slot.classId) {
+            const cls = this.state.classes.find(c => c.id === slot.classId && !c.archived);
+            if (!cls) return;
+
+            if (manualTrigger || !this.activeClassId) {
+              this.activeClassId = slot.classId;
+              if (slot.subjectId) this.activeSubjectId = slot.subjectId;
+              this.activePeriodName = matchedPeriod.name;
+              this.updateHeaderSelectors();
+              this.renderCurrentView();
+              if (manualTrigger) UI.toast(`تم الانتقال إلى ${matchedPeriod.name} (${cls.name})`, 'success');
+            } else if (slot.classId !== this.activeClassId) {
+              this.pendingScheduledSlot = { periodName: matchedPeriod.name, classId: slot.classId, subjectId: slot.subjectId };
+              const banner = document.getElementById('next-period-banner');
+              const txt = document.getElementById('next-period-text');
+              if (banner && txt) {
+                txt.textContent = `حان موعد ${matchedPeriod.name} مع فصل (${cls.name}) — هل تود الانتقال؟`;
+                banner.classList.remove('hidden');
+              }
+            }
+          }
+        } catch (e) { /* Ignore timezone parse edge cases */ }
+      },
+
+      switchToScheduledPeriod() {
+        if (!this.pendingScheduledSlot) return;
+        this.activeClassId = this.pendingScheduledSlot.classId;
+        if (this.pendingScheduledSlot.subjectId) this.activeSubjectId = this.pendingScheduledSlot.subjectId;
+        this.activePeriodName = this.pendingScheduledSlot.periodName;
+        this.lessonStartTime = Date.now();
+        this.pendingScheduledSlot = null;
+        document.getElementById('next-period-banner')?.classList.add('hidden');
+        this.updateHeaderSelectors();
+        this.renderCurrentView();
+        UI.toast('تم الانتقال إلى الحصة المجدولة بنجاح', 'success');
+      },
+
+      /* ========================================================================
+         HEARTS LEDGER ENGINE (Immutable History + Full Group Member Award Rule)
+         ======================================================================== */
+      _recentTxKeys: new Set(),
+
+      awardHearts({ studentIds, points, reason, source, txGroupKey }) {
+        const cleanIds = [...new Set((studentIds || []).filter(Boolean))];
         const pts = parseInt(points, 10);
-        if (isNaN(pts) || pts === 0) {
-          UI.toast('يرجى تحديد عدد صحيح من القلوب', 'warning');
-          return false;
-        }
-        if (txGroupKey && this.recentTxIds.has(txGroupKey)) {
-          return false;
-        }
+        if (!cleanIds.length || isNaN(pts) || pts === 0) return false;
+
         if (txGroupKey) {
-          this.recentTxIds.add(txGroupKey);
-          setTimeout(() => this.recentTxIds.delete(txGroupKey), 4000);
+          if (this._recentTxKeys.has(txGroupKey)) return false;
+          this._recentTxKeys.add(txGroupKey);
+          setTimeout(() => this._recentTxKeys.delete(txGroupKey), 4000);
         }
 
         const now = Date.now();
-        const createdEntries = [];
-        studentIds.forEach(sid => {
+        const newEntries = [];
+        cleanIds.forEach(sid => {
           const st = this.state.students.find(s => s.id === sid);
           if (!st) return;
-          const txId = UI.uid('tx');
-          this._knownLedgerIds.add(txId);
           const entry = {
-            id: txId,
+            id: UI.uid('tx'),
             studentId: sid,
             classId: st.classId,
+            subjectId: this.activeSubjectId || '',
             points: pts,
-            reason: reason || 'مشاركة صفية',
-            source,
+            reason: reason || 'مشاركة متميزة',
+            source: source || 'يدوي',
             timestamp: now,
             undone: false
           };
           this.state.heartLedger.unshift(entry);
-          createdEntries.push(entry);
+          newEntries.push(entry);
         });
 
-        this.saveState(createdEntries);
         SoundFX.play('heart');
+        this.saveState(newEntries);
         this.renderCurrentView();
         return true;
+      },
+
+      getStudentHearts(studentId, period = 'all') {
+        const now = Date.now();
+        return (this.state.heartLedger || []).reduce((sum, tx) => {
+          if (tx.undone || tx.studentId !== studentId) return sum;
+          if (period === 'lesson' && tx.timestamp < this.lessonStartTime) return sum;
+          if (period === 'week' && (now - tx.timestamp) > 7 * 86400000) return sum;
+          if (period === 'month' && (now - tx.timestamp) > 30 * 86400000) return sum;
+          return sum + (Number(tx.points) || 0);
+        }, 0);
       },
 
       undoHeartTx(txId) {
@@ -2107,6 +1690,28 @@
         this.saveState([tx]);
         this.renderCurrentView();
         UI.toast('تم التراجع عن العملية مع الاحتفاظ بها في السجل التاريخي', 'info');
+      },
+
+      openBookInLesson(bookId) {
+        const book = this.state.books.find(b => b.id === bookId);
+        if (!book) return UI.toast('تعذر العثور على الكتاب المحدد', 'warning');
+
+        if (book.subjectId && this.state.subjects.some(s => s.id === book.subjectId)) {
+          this.activeSubjectId = book.subjectId;
+        }
+        if (book.classId && book.classId !== 'all' && this.state.classes.some(c => c.id === book.classId && !c.archived)) {
+          this.activeClassId = book.classId;
+        }
+
+        this.viewerState.bookId = book.id;
+        this.viewerState.pdfDoc = null;
+        this.viewerState._loadedBookId = '';
+        this.viewerState.pageNum = book.lastPageByClass?.[this.activeClassId] || 1;
+        this.lessonMainTab = 'viewer';
+
+        this.updateHeaderSelectors();
+        this.saveState();
+        this.setMainTab('lesson');
       },
 
       openCloudAccountModal() {
@@ -2142,7 +1747,7 @@
                   </div>
                 ` : `
                   <p class="text-xs mt-1 leading-relaxed">
-                    سجّل الدخول بحساب المعلم لمزامنة الفصول والطلاب والقلوب لحظيًا بين اللابتوب والآيباد والجوال.
+                    سجّل الدخول بحساب Google لمزامنة الفصول والطلاب والقلوب لحظيًا بين اللابتوب والآيباد والجوال.
                   </p>
                 `}
               </div>
@@ -2164,27 +1769,14 @@
                   <span>فحص الاتصال السحابي المباشر (اختبار القراءة والكتابة)</span>
                 </button>
 
-                <div class="p-3 rounded-2xl bg-slate-50 border border-slate-200 space-y-2">
-                  <div class="text-xs font-extrabold text-slate-800">🔑 تعيين أو تحديث كلمة مرور لبريدك (للدخول المباشر من أي جهاز):</div>
-                  <div class="flex gap-2">
-                    <input id="link-new-pass" type="password" dir="ltr" placeholder="كلمة مرور جديدة (6 أحرف+)" class="flex-1 px-3 py-2 rounded-xl border border-slate-200 text-xs font-bold text-left bg-white" />
-                    <button onclick="App.setAccountPassword()" class="px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-900 text-white font-bold text-xs shrink-0">حفظ</button>
-                  </div>
-                </div>
-
                 <button onclick="App.logout()" class="w-full py-2.5 px-3 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 font-extrabold text-xs">
                   تسجيل الخروج من هذا الجهاز
                 </button>
               ` : `
                 <div class="space-y-3">
-                  <input id="auth-email" type="email" dir="ltr" placeholder="البريد الإلكتروني" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-bold text-left" />
-                  <input id="auth-pass" type="password" dir="ltr" placeholder="كلمة المرور" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-bold text-left" />
-                  <div class="grid grid-cols-2 gap-2">
-                    <button onclick="App.handleAuth(false)" class="py-2.5 rounded-xl bg-brand-700 text-white font-extrabold text-xs">تسجيل الدخول</button>
-                    <button onclick="App.handleAuth(true)" class="py-2.5 rounded-xl bg-slate-800 text-white font-extrabold text-xs">إنشاء حساب</button>
-                  </div>
-                  <button onclick="App.handleGoogleAuth()" class="w-full py-2.5 rounded-xl border border-slate-200 hover:bg-slate-50 text-slate-800 font-extrabold text-xs">
-                    المتابعة بحساب Google
+                  <button onclick="App.handleGoogleAuth()" class="w-full py-3.5 rounded-2xl bg-brand-700 hover:bg-brand-800 text-white font-black text-sm flex items-center justify-center gap-2 shadow">
+                    <span class="w-6 h-6 rounded-lg bg-white text-brand-900 flex items-center justify-center font-black text-xs">G</span>
+                    <span>المتابعة بحساب Google</span>
                   </button>
                   ${!fbAvailable ? `
                     <div class="pt-2 border-t border-slate-100 space-y-2">
@@ -2259,21 +1851,6 @@
           }
         } catch (e) {
           UI.toast('صيغة JSON غير صحيحة.', 'error');
-        }
-      },
-
-      async handleAuth(isRegister) {
-        try {
-          const email = document.getElementById('auth-email').value.trim();
-          const pass = document.getElementById('auth-pass').value;
-          if (!email || !pass) return UI.toast('أدخل البريد الإلكتروني وكلمة المرور', 'warning');
-          await window.FirebaseBridge.loginEmail(email, pass, isRegister);
-          sessionStorage.removeItem('masahat_local_session');
-          this.explicitLocalSession = false;
-          UI.closeModal();
-          UI.toast(isRegister ? 'تم إنشاء حساب المعلم بنجاح!' : 'تم تسجيل الدخول ومزامنة البيانات!', 'success');
-        } catch (e) {
-          UI.toast(this.formatAuthError(e), 'error');
         }
       },
 
@@ -2884,11 +2461,16 @@
             classId,
             slides,
             docxHtml,
+            cloudDataUrl: (dataUrl && dataUrl.length <= 650000) ? dataUrl : null,
             lastPageByClass: {}
           });
+          App.viewerState.bookId = bookId;
+          App.viewerState.pdfDoc = null;
+          App.viewerState._loadedBookId = '';
+          App.viewerState.pageNum = 1;
           App.saveState();
           App.renderCurrentView();
-          UI.toast('تم رفع الملف وتنظيمه بنجاح!', 'success');
+          UI.toast('تم رفع الملف وتنظيمه بنجاح! يمكنك فتحه الآن في الحصة.', 'success');
         } catch (e) {
           UI.toast('حدث خطأ أثناء رفع الملف', 'error');
         }
@@ -3341,10 +2923,14 @@
 
       render() {
         const books = this.getAvailableBooks();
-        if (!App.viewerState.bookId && books.length > 0) {
-          App.viewerState.bookId = books[0].id;
+        let currentBook = books.find(b => b.id === App.viewerState.bookId);
+        if (!currentBook && books.length > 0) {
+          currentBook = books[0];
+          App.viewerState.bookId = currentBook.id;
+          App.viewerState.pdfDoc = null;
+          App.viewerState._loadedBookId = '';
+          App.viewerState.pageNum = currentBook.lastPageByClass?.[App.activeClassId] || 1;
         }
-        const currentBook = books.find(b => b.id === App.viewerState.bookId) || books[0];
 
         if (!currentBook) {
           return `
@@ -3416,6 +3002,10 @@
 
             <!-- Canvas / Document Display Stage -->
             <div id="viewer-scroll-area" class="relative bg-slate-200 min-h-[500px] max-h-[75vh] overflow-auto flex items-start justify-center p-4">
+              <div id="viewer-loading-badge" class="hidden absolute top-4 right-4 z-20 px-3.5 py-2 rounded-xl bg-brand-900/90 text-white text-xs font-extrabold flex items-center gap-2 shadow-lg">
+                <span class="w-3.5 h-3.5 border-2 border-amber-400 border-t-transparent rounded-full animate-spin"></span>
+                <span>جارٍ تحميل الصفحة...</span>
+              </div>
               <div id="page-canvas-stack" class="relative bg-white shadow-xl rounded-lg overflow-hidden">
                 <canvas id="doc-render-canvas" class="block"></canvas>
                 <div id="doc-html-container" class="hidden p-6 max-w-2xl text-right leading-relaxed"></div>
@@ -3429,6 +3019,7 @@
       selectBook(bookId) {
         App.viewerState.bookId = bookId;
         App.viewerState.pdfDoc = null;
+        App.viewerState._loadedBookId = '';
         const book = App.state.books.find(b => b.id === bookId);
         const savedPage = book?.lastPageByClass?.[App.activeClassId] || 1;
         App.viewerState.pageNum = savedPage;
@@ -3468,8 +3059,14 @@
       },
 
       async afterRender() {
-        const book = App.state.books.find(b => b.id === App.viewerState.bookId);
+        const books = this.getAvailableBooks();
+        let book = books.find(b => b.id === App.viewerState.bookId) || books[0];
         if (!book) return;
+        if (App.viewerState.bookId !== book.id) {
+          App.viewerState.bookId = book.id;
+          App.viewerState.pdfDoc = null;
+          App.viewerState._loadedBookId = '';
+        }
         const savedPage = book.lastPageByClass?.[App.activeClassId];
         if (savedPage && App.viewerState.pageNum === 1 && savedPage !== 1 && !App.viewerState.pdfDoc) {
           App.viewerState.pageNum = savedPage;
@@ -3485,104 +3082,147 @@
         const docCanvas = document.getElementById('doc-render-canvas');
         const htmlBox = document.getElementById('doc-html-container');
         const annotCanvas = document.getElementById('annot-canvas');
+        const loader = document.getElementById('viewer-loading-badge');
         if (!docCanvas || !annotCanvas) return;
 
-        const dataUrl = await FileDB.getFile(book.id);
+        if (loader) loader.classList.remove('hidden');
 
-        if (book.fileType === 'pdf' && dataUrl) {
-          docCanvas.classList.remove('hidden');
-          htmlBox.classList.add('hidden');
-          if (!App.viewerState.pdfDoc) {
-            App.viewerState.pdfDoc = await pdfjsLib.getDocument(dataUrl).promise;
+        try {
+          let dataUrl = await FileDB.getFile(book.id);
+          if (!dataUrl && book.cloudDataUrl) {
+            dataUrl = book.cloudDataUrl;
+            FileDB.saveFile(book.id, dataUrl).catch(() => {});
           }
-          App.viewerState.numPages = App.viewerState.pdfDoc.numPages;
-          const totalEl = document.getElementById('page-total-label');
-          if (totalEl) totalEl.textContent = App.viewerState.numPages;
 
-          const page = await App.viewerState.pdfDoc.getPage(App.viewerState.pageNum);
-          const viewport = page.getViewport({ scale: App.viewerState.scale });
-          docCanvas.width = viewport.width;
-          docCanvas.height = viewport.height;
-          annotCanvas.width = viewport.width;
-          annotCanvas.height = viewport.height;
-
-          await page.render({ canvasContext: docCanvas.getContext('2d'), viewport }).promise;
-        } else if (book.fileType === 'image' && dataUrl) {
-          docCanvas.classList.remove('hidden');
-          htmlBox.classList.add('hidden');
-          App.viewerState.numPages = 1;
-          const img = new Image();
-          img.src = dataUrl;
-          await new Promise(r => { img.onload = r; });
-          const w = img.width * App.viewerState.scale * 0.7;
-          const h = img.height * App.viewerState.scale * 0.7;
-          docCanvas.width = w;
-          docCanvas.height = h;
-          annotCanvas.width = w;
-          annotCanvas.height = h;
-          docCanvas.getContext('2d').drawImage(img, 0, 0, w, h);
-        } else if (book.fileType === 'pptx') {
-          docCanvas.classList.remove('hidden');
-          htmlBox.classList.add('hidden');
-          const slides = book.slides?.length ? book.slides : ['عرض تقديمي'];
-          App.viewerState.numPages = slides.length;
-          const totalEl = document.getElementById('page-total-label');
-          if (totalEl) totalEl.textContent = slides.length;
-          const w = 720 * App.viewerState.scale * 0.85;
-          const h = 420 * App.viewerState.scale * 0.85;
-          docCanvas.width = w;
-          docCanvas.height = h;
-          annotCanvas.width = w;
-          annotCanvas.height = h;
-          const ctx = docCanvas.getContext('2d');
-          ctx.fillStyle = '#ffffff';
-          ctx.fillRect(0, 0, w, h);
-          ctx.fillStyle = '#4c1d95';
-          ctx.fillRect(0, 0, w, 46);
-          ctx.fillStyle = '#fbbf24';
-          ctx.font = 'bold 18px Cairo, sans-serif';
-          ctx.textAlign = 'right';
-          ctx.fillText(`شريحة ${App.viewerState.pageNum} من ${slides.length} — ${book.title}`, w - 20, 30);
-          ctx.fillStyle = '#0f172a';
-          ctx.font = 'bold 20px Cairo, sans-serif';
-          const text = slides[App.viewerState.pageNum - 1] || '';
-          const words = text.split(' ');
-          let line = '';
-          let y = 95;
-          words.forEach(word => {
-            const test = line + word + ' ';
-            if (ctx.measureText(test).width > w - 60) {
-              ctx.fillText(line, w - 30, y);
-              line = word + ' ';
-              y += 32;
-            } else {
-              line = test;
+          if (book.fileType === 'pdf') {
+            if (!dataUrl) {
+              docCanvas.classList.add('hidden');
+              htmlBox.classList.remove('hidden');
+              htmlBox.innerHTML = `
+                <div class="p-6 text-center space-y-2">
+                  <div class="text-base font-black text-slate-900">📄 ملف PDF محفوظ على الجهاز الذي رُفع منه</div>
+                  <p class="text-xs text-slate-500">نظرًا لكبر حجم ملف PDF، يرجى رفعه على هذا الجهاز أيضًا أو استخدام ملف بحجم أصغر للمزامنة التلقائية.</p>
+                </div>
+              `;
+              return;
             }
-          });
-          ctx.fillText(line, w - 30, y);
-        } else if (book.fileType === 'docx') {
-          docCanvas.classList.add('hidden');
-          htmlBox.classList.remove('hidden');
-          App.viewerState.numPages = 1;
-          htmlBox.innerHTML = `
-            <div class="mb-4 p-3 rounded-xl bg-amber-50 border border-amber-200 flex items-center justify-between text-xs">
-              <span>مستند Word مُحوّل للمعاينة السريعة</span>
-              ${dataUrl ? `<a href="${dataUrl}" download="${UI.escapeHtml(book.fileName || 'document.docx')}" class="px-3 py-1.5 rounded-lg bg-brand-700 text-white font-bold">تنزيل الملف الأصلي</a>` : ''}
-            </div>
-            <div class="prose max-w-none">${book.docxHtml || ''}</div>
-          `;
-          annotCanvas.width = htmlBox.offsetWidth || 640;
-          annotCanvas.height = htmlBox.offsetHeight || 500;
-        }
+            docCanvas.classList.remove('hidden');
+            htmlBox.classList.add('hidden');
+            if (!App.viewerState.pdfDoc || App.viewerState._loadedBookId !== book.id) {
+              App.viewerState.pdfDoc = await pdfjsLib.getDocument(dataUrl).promise;
+              App.viewerState._loadedBookId = book.id;
+            }
+            App.viewerState.numPages = App.viewerState.pdfDoc.numPages;
+            const totalEl = document.getElementById('page-total-label');
+            if (totalEl) totalEl.textContent = App.viewerState.numPages;
 
-        this.redrawAnnotations();
+            const safePage = Math.min(App.viewerState.numPages, Math.max(1, App.viewerState.pageNum));
+            App.viewerState.pageNum = safePage;
+            const inp = document.getElementById('page-num-input');
+            if (inp) inp.value = safePage;
+
+            const page = await App.viewerState.pdfDoc.getPage(safePage);
+            const viewport = page.getViewport({ scale: App.viewerState.scale });
+            docCanvas.width = viewport.width;
+            docCanvas.height = viewport.height;
+            docCanvas.style.width = `${viewport.width}px`;
+            docCanvas.style.height = `${viewport.height}px`;
+            annotCanvas.width = viewport.width;
+            annotCanvas.height = viewport.height;
+            annotCanvas.style.width = `${viewport.width}px`;
+            annotCanvas.style.height = `${viewport.height}px`;
+
+            await page.render({ canvasContext: docCanvas.getContext('2d'), viewport }).promise;
+          } else if (book.fileType === 'image' && dataUrl) {
+            docCanvas.classList.remove('hidden');
+            htmlBox.classList.add('hidden');
+            App.viewerState.numPages = 1;
+            const img = new Image();
+            img.src = dataUrl;
+            await new Promise((res, rej) => { img.onload = res; img.onerror = rej; });
+            const w = Math.round(img.width * App.viewerState.scale * 0.7);
+            const h = Math.round(img.height * App.viewerState.scale * 0.7);
+            docCanvas.width = w;
+            docCanvas.height = h;
+            docCanvas.style.width = `${w}px`;
+            docCanvas.style.height = `${h}px`;
+            annotCanvas.width = w;
+            annotCanvas.height = h;
+            annotCanvas.style.width = `${w}px`;
+            annotCanvas.style.height = `${h}px`;
+            docCanvas.getContext('2d').drawImage(img, 0, 0, w, h);
+          } else if (book.fileType === 'pptx') {
+            docCanvas.classList.remove('hidden');
+            htmlBox.classList.add('hidden');
+            const slides = book.slides?.length ? book.slides : ['عرض تقديمي'];
+            App.viewerState.numPages = slides.length;
+            const totalEl = document.getElementById('page-total-label');
+            if (totalEl) totalEl.textContent = slides.length;
+            const w = Math.round(720 * App.viewerState.scale * 0.85);
+            const h = Math.round(420 * App.viewerState.scale * 0.85);
+            docCanvas.width = w;
+            docCanvas.height = h;
+            docCanvas.style.width = `${w}px`;
+            docCanvas.style.height = `${h}px`;
+            annotCanvas.width = w;
+            annotCanvas.height = h;
+            annotCanvas.style.width = `${w}px`;
+            annotCanvas.style.height = `${h}px`;
+            const ctx = docCanvas.getContext('2d');
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(0, 0, w, h);
+            ctx.fillStyle = '#4c1d95';
+            ctx.fillRect(0, 0, w, 46);
+            ctx.fillStyle = '#fbbf24';
+            ctx.font = 'bold 18px Cairo, sans-serif';
+            ctx.textAlign = 'right';
+            ctx.fillText(`شريحة ${App.viewerState.pageNum} من ${slides.length} — ${book.title}`, w - 20, 30);
+            ctx.fillStyle = '#0f172a';
+            ctx.font = 'bold 20px Cairo, sans-serif';
+            const text = slides[App.viewerState.pageNum - 1] || '';
+            const words = text.split(' ');
+            let line = '';
+            let y = 95;
+            words.forEach(word => {
+              const test = line + word + ' ';
+              if (ctx.measureText(test).width > w - 60) {
+                ctx.fillText(line, w - 30, y);
+                line = word + ' ';
+                y += 32;
+              } else {
+                line = test;
+              }
+            });
+            ctx.fillText(line, w - 30, y);
+          } else if (book.fileType === 'docx') {
+            docCanvas.classList.add('hidden');
+            htmlBox.classList.remove('hidden');
+            App.viewerState.numPages = 1;
+            htmlBox.innerHTML = `
+              <div class="mb-4 p-3 rounded-xl bg-amber-50 border border-amber-200 flex items-center justify-between text-xs">
+                <span>مستند Word مُحوّل للمعاينة السريعة</span>
+                ${dataUrl ? `<a href="${dataUrl}" download="${UI.escapeHtml(book.fileName || 'document.docx')}" class="px-3 py-1.5 rounded-lg bg-brand-700 text-white font-bold">تنزيل الملف الأصلي</a>` : ''}
+              </div>
+              <div class="prose max-w-none">${book.docxHtml || ''}</div>
+            `;
+            annotCanvas.width = htmlBox.offsetWidth || 640;
+            annotCanvas.height = htmlBox.offsetHeight || 500;
+          }
+
+          this.redrawAnnotations();
+        } catch (err) {
+          console.error('Error rendering book page:', err);
+          UI.toast('تعذر عرض هذه الصفحة، حاول تحديث الصفحة أو إعادة اختيار الكتاب', 'warning');
+        } finally {
+          if (loader) loader.classList.add('hidden');
+        }
       },
 
       bindAnnotationEvents() {
         const canvas = document.getElementById('annot-canvas');
         if (!canvas) return;
 
-        const getNormPos = (e) => {
+        const getNormCoords = (e) => {
           const rect = canvas.getBoundingClientRect();
           return {
             x: (e.clientX - rect.left) / rect.width,
@@ -3594,22 +3234,23 @@
           if (!App.viewerState.showAnnotations) return;
           canvas.setPointerCapture(e.pointerId);
           this.isDrawing = true;
-          const pos = getNormPos(e);
+          const pt = getNormCoords(e);
           this.currentStroke = {
             tool: App.viewerState.tool,
             color: App.viewerState.color,
             width: App.viewerState.lineWidth,
-            points: [pos]
+            points: [pt]
           };
         };
 
         canvas.onpointermove = (e) => {
           if (!this.isDrawing || !this.currentStroke) return;
-          this.currentStroke.points.push(getNormPos(e));
+          const pt = getNormCoords(e);
+          this.currentStroke.points.push(pt);
           this.redrawAnnotations(this.currentStroke);
         };
 
-        const finishStroke = () => {
+        const endStroke = () => {
           if (!this.isDrawing || !this.currentStroke) return;
           this.isDrawing = false;
           const key = this.getAnnotKey();
@@ -3621,8 +3262,8 @@
           this.redrawAnnotations();
         };
 
-        canvas.onpointerup = finishStroke;
-        canvas.onpointercancel = finishStroke;
+        canvas.onpointerup = endStroke;
+        canvas.onpointercancel = endStroke;
       },
 
       redrawAnnotations(activeStroke = null) {
@@ -3643,21 +3284,22 @@
           ctx.lineJoin = 'round';
           if (st.tool === 'eraser') {
             ctx.globalCompositeOperation = 'destination-out';
-            ctx.lineWidth = (st.width || 4) * 3;
+            ctx.lineWidth = (st.width || 4) * 4;
           } else if (st.tool === 'highlighter') {
+            ctx.globalCompositeOperation = 'multiply';
             ctx.globalAlpha = 0.35;
             ctx.strokeStyle = st.color || '#eab308';
             ctx.lineWidth = (st.width || 4) * 3.5;
           } else {
-            ctx.globalAlpha = 1;
+            ctx.globalCompositeOperation = 'source-over';
             ctx.strokeStyle = st.color || '#ef4444';
             ctx.lineWidth = st.width || 4;
           }
 
           ctx.beginPath();
-          st.points.forEach((pt, idx) => {
-            const px = pt.x * canvas.width;
-            const py = pt.y * canvas.height;
+          st.points.forEach((p, idx) => {
+            const px = p.x * canvas.width;
+            const py = p.y * canvas.height;
             if (idx === 0) ctx.moveTo(px, py);
             else ctx.lineTo(px, py);
           });
@@ -3678,10 +3320,10 @@
 
       redoStroke() {
         const key = this.getAnnotKey();
-        const stack = App.viewerState.redoStack[key];
-        if (!stack || !stack.length) return;
+        const redo = App.viewerState.redoStack[key];
+        if (!redo || !redo.length) return;
         if (!App.state.annotations[key]) App.state.annotations[key] = [];
-        App.state.annotations[key].push(stack.pop());
+        App.state.annotations[key].push(redo.pop());
         App.saveState();
         this.redrawAnnotations();
       },
@@ -3692,9 +3334,10 @@
       },
 
       clearPageAnnotations() {
-        UI.confirm('مسح تعليقات الصفحة', 'هل تريد مسح جميع الرسومات والتعليقات في هذه الصفحة؟', () => {
+        UI.confirm('مسح تعليقات الصفحة', 'هل تريد مسح جميع الرسومات والتظليلات على هذه الصفحة؟', () => {
           const key = this.getAnnotKey();
           App.state.annotations[key] = [];
+          App.viewerState.redoStack[key] = [];
           App.saveState();
           this.redrawAnnotations();
         });
@@ -3702,71 +3345,75 @@
     };
 
     /* ==========================================================================
-       6B. POINTS (HEARTS ❤️) & INSTANT QR SCANNER MODULE
+       6B. HEARTS POINTS & INSTANT QR SCANNER MODULE
        ========================================================================== */
     const PointsQRModule = {
       selectedPoints: 5,
       selectedReason: 'مشاركة متميزة',
       scannerStream: null,
       scannerAnim: null,
-      lastScannedToken: null,
+      lastScannedToken: '',
       lastScannedAt: 0,
 
       render() {
-        const students = App.state.students.filter(s => s.classId === App.activeClassId);
-        const groups = App.state.groupsByClass[App.activeClassId] || [];
+        const clsId = App.activeClassId;
+        const students = App.state.students.filter(s => s.classId === clsId);
+        const groups = App.state.groupsByClass[clsId] || [];
+        const reasons = ['مشاركة متميزة', 'إجابة صحيحة', 'تعاون جماعي', 'انضباط والتزام', 'إبداع وتميز'];
 
         return `
-          <div class="space-y-3">
+          <div class="space-y-4">
             <div class="flex items-center justify-between">
-              <h3 class="font-black text-slate-900 text-base flex items-center gap-1.5">
-                <span class="text-rose-500">❤️</span> منح القلوب ومسح QR
-              </h3>
-              <!-- Printable QR Cards Button: Visible ONLY on Desktop/Laptop (lg:inline-flex), hidden on Mobile/iPad -->
-              <button onclick="PointsQRModule.printClassQRCards()" class="hidden lg:inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-brand-50 text-brand-700 hover:bg-brand-100 font-bold text-xs border border-brand-200">
+              <h3 class="font-black text-slate-900 text-base">❤️ منح القلوب ومسح QR</h3>
+              <!-- Print QR cards button: hidden on Mobile/iPad, visible on Laptop/Desktop (xl:flex) -->
+              <button onclick="PointsQRModule.printClassQRCards()" class="hidden xl:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-brand-50 hover:bg-brand-100 text-brand-800 border border-brand-200 font-bold text-xs">
                 <i data-lucide="qr-code" class="w-3.5 h-3.5"></i>
-                <span>بطاقات QR</span>
+                <span>طباعة بطاقات QR</span>
               </button>
             </div>
 
-            <!-- Quick Heart Value & Reason Selector -->
-            <div class="p-3 rounded-2xl bg-slate-50 border border-slate-200 space-y-2">
-              <div class="grid grid-cols-4 gap-1.5">
-                ${[1, 5, 10, 15].map(v => `
-                  <button onclick="PointsQRModule.selectedPoints=${v}; App.renderCurrentView()"
-                    class="py-1.5 rounded-xl font-black text-xs transition ${this.selectedPoints === v ? 'bg-rose-600 text-white shadow' : 'bg-white border border-slate-200 text-slate-700'}">
-                    +${v} ❤️
-                  </button>
-                `).join('')}
+            <!-- Points & Reason Selector -->
+            <div class="p-3 rounded-2xl bg-slate-50 border border-slate-200 space-y-2.5">
+              <div class="flex items-center justify-between gap-1.5">
+                <span class="text-xs font-bold text-slate-600">القيمة:</span>
+                <div class="flex gap-1">
+                  ${[1, 3, 5, 10].map(val => `
+                    <button onclick="PointsQRModule.selectedPoints=${val}; App.renderCurrentView()"
+                      class="px-2.5 py-1 rounded-xl font-black text-xs transition ${this.selectedPoints === val ? 'bg-rose-600 text-white shadow' : 'bg-white border border-slate-200 text-slate-700'}">
+                      +${val} ❤️
+                    </button>
+                  `).join('')}
+                </div>
               </div>
-              <select onchange="PointsQRModule.selectedReason=this.value" class="w-full px-3 py-1.5 rounded-xl border border-slate-200 bg-white text-xs font-bold">
-                ${['مشاركة متميزة', 'إجابة صحيحة', 'تعاون مع المجموعة', 'انضباط والتزام', 'مبادرة وإبداع'].map(r => `
-                  <option value="${r}" ${this.selectedReason === r ? 'selected' : ''}>${r}</option>
-                `).join('')}
+              <select onchange="PointsQRModule.selectedReason=this.value" class="w-full px-3 py-2 rounded-xl border border-slate-200 bg-white text-xs font-bold">
+                ${reasons.map(r => `<option value="${r}" ${this.selectedReason === r ? 'selected' : ''}>السبب: ${r}</option>`).join('')}
               </select>
             </div>
 
-            <!-- Instant Camera QR Scanner -->
+            <!-- QR Scanner Controls -->
             <div class="space-y-2">
-              <button onclick="PointsQRModule.toggleScanner()" id="btn-toggle-qr-cam" class="w-full py-2.5 rounded-xl bg-brand-700 hover:bg-brand-800 text-white font-extrabold text-xs flex items-center justify-center gap-2 shadow">
-                <i data-lucide="camera" class="w-4 h-4"></i>
-                <span>مسح بطاقة QR بالكاميرا (تسجيل فوري)</span>
+              <button onclick="PointsQRModule.toggleScanner()" class="w-full py-2.5 rounded-xl bg-brand-700 hover:bg-brand-800 text-white font-extrabold text-xs flex items-center justify-center gap-2 shadow">
+                <i data-lucide="scan-line" class="w-4 h-4"></i>
+                <span>تشغيل / إيقاف كاميرا مسح بطاقات QR</span>
               </button>
-              <div id="qr-camera-box" class="hidden relative rounded-2xl overflow-hidden bg-black aspect-video">
+
+              <div id="qr-camera-box" class="hidden relative rounded-2xl overflow-hidden bg-black aspect-video border-2 border-brand-600">
                 <video id="qr-video" playsinline class="w-full h-full object-cover"></video>
                 <canvas id="qr-hidden-canvas" class="hidden"></canvas>
-                <div class="absolute inset-0 border-4 border-amber-400/70 rounded-2xl pointer-events-none"></div>
+                <div class="absolute bottom-2 inset-x-2 bg-black/70 text-white text-[11px] font-bold text-center py-1 rounded-lg">
+                  وجّه الكاميرا نحو بطاقة الطالب — تُسجَّل القلوب فورًا!
+                </div>
               </div>
             </div>
 
-            <!-- Award to Entire Group (Every member gets full points) -->
+            <!-- Award to Entire Group (Full points to every member) -->
             ${groups.length > 0 ? `
               <div class="space-y-1.5">
-                <div class="text-[11px] font-extrabold text-slate-500">منح مجموعة كاملة (+${this.selectedPoints} ❤️ لكل عضو):</div>
+                <div class="text-xs font-extrabold text-slate-700">منح لمجموعة كاملة (+${this.selectedPoints} ❤️ لكل عضو):</div>
                 <div class="grid grid-cols-2 gap-1.5">
-                  ${groups.map((g, gIdx) => `
-                    <button onclick="PointsQRModule.awardGroup(${gIdx})" class="px-3 py-2 rounded-xl bg-amber-50 hover:bg-amber-100 border border-amber-200 text-amber-950 font-extrabold text-xs text-right truncate">
-                      🏆 ${UI.escapeHtml(g.name)} (${g.studentIds.length})
+                  ${groups.map((g, idx) => `
+                    <button onclick="PointsQRModule.awardGroup(${idx})" class="p-2 rounded-xl bg-amber-50 hover:bg-amber-100 border border-amber-200 text-amber-950 font-extrabold text-xs truncate">
+                      👥 ${UI.escapeHtml(g.name)}
                     </button>
                   `).join('')}
                 </div>
@@ -3774,44 +3421,47 @@
             ` : ''}
 
             <!-- Individual Students Quick Tap List -->
-            <div class="space-y-1.5 max-h-[340px] overflow-y-auto pt-1">
-              <div class="text-[11px] font-extrabold text-slate-500">اضغط على الطالب لمنحه +${this.selectedPoints} ❤️:</div>
-              ${students.length === 0 ? `<div class="text-xs text-slate-400 py-4 text-center">لا يوجد طلاب في هذا الفصل.</div>` : ''}
-              ${students.map(st => `
-                <button onclick="PointsQRModule.awardSingle('${st.id}', '${UI.escapeHtml(st.name)}')"
-                  class="w-full px-3 py-2 rounded-xl border border-slate-200 hover:border-rose-300 hover:bg-rose-50/60 flex items-center justify-between transition text-right">
-                  <span class="font-bold text-xs text-slate-900 truncate">${UI.escapeHtml(st.name)}</span>
-                  <span class="px-2 py-0.5 rounded-full bg-rose-100 text-rose-700 font-black text-xs shrink-0">❤️ ${App.getStudentHearts(st.id)}</span>
-                </button>
-              `).join('')}
+            <div class="space-y-1.5">
+              <div class="text-xs font-extrabold text-slate-700">الطلاب (${students.length}) — اضغط لمنح القلوب:</div>
+              <div class="max-h-64 overflow-y-auto divide-y divide-slate-100 border border-slate-200 rounded-2xl bg-white">
+                ${students.length === 0 ? `<div class="p-6 text-center text-xs text-slate-400">لا يوجد طلاب في هذا الفصل.</div>` : ''}
+                ${students.map(st => `
+                  <button onclick="PointsQRModule.awardStudent('${st.id}')" class="w-full px-3 py-2.5 flex items-center justify-between hover:bg-rose-50/70 transition text-right">
+                    <span class="font-bold text-xs text-slate-900 truncate">${UI.escapeHtml(st.name)}</span>
+                    <span class="px-2.5 py-0.5 rounded-full bg-rose-100 text-rose-700 font-black text-xs shrink-0">❤️ ${App.getStudentHearts(st.id)}</span>
+                  </button>
+                `).join('')}
+              </div>
             </div>
           </div>
         `;
       },
 
-      awardSingle(studentId, name) {
+      awardStudent(studentId) {
+        const st = App.state.students.find(s => s.id === studentId);
+        if (!st) return;
         const ok = App.awardHearts({
           studentIds: [studentId],
           points: this.selectedPoints,
           reason: this.selectedReason,
           source: 'يدوي',
-          txGroupKey: `single_${studentId}_${Date.now() >> 10}`
+          txGroupKey: `man_${studentId}_${Math.floor(Date.now() / 600)}`
         });
-        if (ok) UI.toast(`❤️ +${this.selectedPoints} لـ ${name}`, 'success');
+        if (ok) UI.toast(`❤️ +${this.selectedPoints} لـ ${st.name}`, 'success');
       },
 
-      awardGroup(groupIndex) {
+      awardGroup(groupIdx) {
         const groups = App.state.groupsByClass[App.activeClassId] || [];
-        const grp = groups[groupIndex];
-        if (!grp || !grp.studentIds.length) return;
+        const g = groups[groupIdx];
+        if (!g || !g.studentIds.length) return UI.toast('المجموعة فارغة', 'warning');
         const ok = App.awardHearts({
-          studentIds: grp.studentIds,
+          studentIds: g.studentIds,
           points: this.selectedPoints,
-          reason: `${this.selectedReason} (${grp.name})`,
+          reason: `${this.selectedReason} (${g.name})`,
           source: 'مجموعة',
-          txGroupKey: `grp_${groupIndex}_${Date.now() >> 10}`
+          txGroupKey: `grp_${groupIdx}_${Math.floor(Date.now() / 600)}`
         });
-        if (ok) UI.toast(`❤️ +${this.selectedPoints} كاملة لكل عضو في ${grp.name}`, 'success');
+        if (ok) UI.toast(`❤️ +${this.selectedPoints} لكل عضو في ${g.name}`, 'success');
       },
 
       async toggleScanner() {
@@ -3828,8 +3478,8 @@
           await video.play();
           box.classList.remove('hidden');
           this.scanLoop();
-        } catch (e) {
-          UI.toast('تعذر فتح الكاميرا؛ يمكنك اختيار اسم الطالب مباشرة من القائمة أدناه.', 'warning');
+        } catch (err) {
+          UI.toast('تعذر فتح الكاميرا — يمكنك الضغط على اسم الطالب مباشرة من القائمة أدناه.', 'warning');
         }
       },
 
@@ -3923,7 +3573,7 @@
     };
 
     /* ==========================================================================
-       6C. FAIR WHEEL OF NAMES MODULE
+       6C. FAIR WHEEL OF NAMES MODULE (With Rhythmic Spinning Sound)
        ========================================================================== */
     const WheelModule = {
       angle: 0,
@@ -4035,22 +3685,31 @@
       spin() {
         const { remaining } = this.getWheelPool();
         if (this.spinning || !remaining.length) return;
+        SoundFX.ensureCtx();
         this.spinning = true;
         const duration = App.state.settings.reduceMotion ? 200 : 2800;
         const startAngle = this.angle;
         const extraSpins = (Math.PI * 2) * (5 + Math.random() * 4);
         const startTime = performance.now();
+        const slice = (Math.PI * 2) / remaining.length;
+        let lastSliceIdx = -1;
 
         const animate = (now) => {
           const t = Math.min(1, (now - startTime) / duration);
           const ease = 1 - Math.pow(1 - t, 3);
           this.angle = startAngle + extraSpins * ease;
+
+          const currentSliceIdx = Math.floor(((this.angle % (Math.PI * 2)) + Math.PI * 2) / slice);
+          if (currentSliceIdx !== lastSliceIdx) {
+            lastSliceIdx = currentSliceIdx;
+            SoundFX.play('wheelTick');
+          }
+
           this.drawWheel();
           if (t < 1) {
             requestAnimationFrame(animate);
           } else {
             this.spinning = false;
-            const slice = (Math.PI * 2) / remaining.length;
             const pointerAngle = (Math.PI * 1.5 - (this.angle % (Math.PI * 2)) + Math.PI * 2) % (Math.PI * 2);
             const winIdx = Math.floor(pointerAngle / slice) % remaining.length;
             this.winner = remaining[winIdx];
@@ -4225,7 +3884,7 @@
     };
 
     /* ==========================================================================
-       6F. 2D EDUCATIONAL GAMES MODULE (Shared Question & Hearts Engine)
+       6F. 2D EDUCATIONAL GAMES MODULE (With Animated Moving Rocket)
        ========================================================================== */
     const GamesModule = {
       render() {
@@ -4282,7 +3941,6 @@
               </div>
             </div>
 
-            <!-- Optional Quick Question On-the-fly -->
             <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-2">
               <div class="text-xs font-extrabold text-slate-800">➕ إضافة سؤال سريع قبل بدء اللعبة (اختياري):</div>
               <input id="quick-game-q" type="text" placeholder="نص السؤال السريع..." class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs font-bold bg-white" />
@@ -4359,7 +4017,8 @@
           currentQuestion: App.gameState.gameType === 'box' ? null : selectedQs[0],
           selectedOption: null,
           revealed: false,
-          pointsPerQ: ptsPerQ
+          pointsPerQ: ptsPerQ,
+          lastBoostedIdx: -1
         };
         App.renderCurrentView();
       },
@@ -4383,18 +4042,27 @@
             </div>
 
             ${gs.gameType === 'race' ? `
-              <div class="p-4 rounded-2xl bg-slate-900 text-white space-y-2.5">
-                <div class="text-xs font-bold text-amber-300">🚀 مضمار سباق الصواريخ 2D:</div>
-                ${gs.participants.map(p => {
-                  const pct = Math.min(100, Math.round((p.score / Math.max(1, gs.questions.length)) * 100));
+              <div class="p-4 rounded-2xl bg-gradient-to-l from-slate-950 via-brand-950 to-slate-900 text-white space-y-3 border border-brand-800 shadow-inner">
+                <div class="flex items-center justify-between text-xs font-extrabold text-amber-300">
+                  <span>🚀 مضمار سباق الصواريخ 2D</span>
+                  <span>خط النهاية 🏁</span>
+                </div>
+                ${gs.participants.map((p, pIdx) => {
+                  const pct = Math.min(92, Math.round((p.score / Math.max(1, gs.questions.length)) * 88));
+                  const isBoosted = gs.lastBoostedIdx === pIdx;
                   return `
                     <div class="space-y-1">
                       <div class="flex justify-between text-xs font-bold">
-                        <span>${UI.escapeHtml(p.name)}</span>
-                        <span>${p.score} إجابات</span>
+                        <span class="text-white">${UI.escapeHtml(p.name)}</span>
+                        <span class="text-amber-300">${p.score} / ${gs.questions.length} إجابات</span>
                       </div>
-                      <div class="w-full h-4 bg-slate-800 rounded-full overflow-hidden relative">
-                        <div class="h-full bg-gradient-to-l from-amber-400 to-brand-500 transition-all duration-500" style="width:${Math.max(8, pct)}%"></div>
+                      <div class="w-full h-9 bg-slate-800/90 rounded-full overflow-hidden relative border border-white/10 flex items-center px-2">
+                        <span class="absolute left-2.5 text-base z-10 select-none">🏁</span>
+                        <div class="h-3 bg-gradient-to-l from-amber-400 via-orange-500 to-brand-500 rounded-full transition-all duration-700 ease-out" style="width:${Math.max(6, pct)}%"></div>
+                        <div class="absolute transition-all duration-700 ease-out flex items-center z-20 ${isBoosted ? 'scale-125' : ''}" style="right: calc(${Math.max(4, pct)}% - 12px);">
+                          <span class="text-2xl inline-block transform -rotate-45 drop-shadow-[0_0_8px_rgba(251,191,36,0.9)]">🚀</span>
+                          ${p.score > 0 ? `<span class="text-sm -mr-1 animate-pulse">🔥</span>` : ''}
+                        </div>
                       </div>
                     </div>
                   `;
@@ -4481,10 +4149,12 @@
         if (gs.selectedOption === null) return UI.toast('اختر الإجابة التي أجاب بها الطلاب أولاً', 'warning');
         gs.revealed = true;
         const q = gs.currentQuestion;
-        const participant = gs.participants[gs.turnIndex % gs.participants.length];
+        const pIdx = gs.turnIndex % gs.participants.length;
+        const participant = gs.participants[pIdx];
 
         if (gs.selectedOption === q.correctIndex) {
           participant.score += 1;
+          gs.lastBoostedIdx = pIdx;
           SoundFX.play('win');
           App.awardHearts({
             studentIds: participant.studentIds,
@@ -4493,6 +4163,7 @@
             source: 'لعبة تعليمية'
           });
         } else {
+          gs.lastBoostedIdx = -1;
           SoundFX.play('wrong');
         }
         App.renderCurrentView();
